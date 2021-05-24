@@ -1,43 +1,91 @@
-import { MyContext } from "src/types";
+import { User } from "../entities/User";
+import { MyContext } from "../types";
 import {
   Arg,
   Ctx,
+  FieldResolver,
   Mutation,
-  //   Field,
-  //   Mutation,
-  //   ObjectType,
-  //   FieldResolver,
   Query,
   Resolver,
+  Root,
 } from "type-graphql";
 import { getConnection } from "typeorm";
 import { Game } from "../entities/Game";
 import generateRandomWord from "../utils/generateRandomWord";
+import { GameField } from "../entities/GameField";
 
 /**
  * TODO:
- * - loadGame mutation
- * - createGame mutation
  * - deleteGame mutation
- * - updateGame (scoreP1, scoreP2 ..., gameField) mutation
- * - updateWord (set up initial word)
  *  */
-
-// @ObjectType()
-// class GameResponse {
-//   @Field(() => Game, { nullable: true })
-//   game?: Game;
-// }
-
 @Resolver(Game)
 export class GameResolver {
+  @FieldResolver(() => [User], { nullable: true })
+  async players(@Root() game: Game, @Arg("userId") userId: number) {
+    const u = await User.find({
+      where: [{ id: game.p2id }, { id: game.p1id }],
+    });
+    if (u[0] && u[1]) {
+      if (u[0].id === userId || u[1].id === userId) {
+        return [u];
+      }
+    }
+    return null;
+  }
+
+  @FieldResolver(() => GameField)
+  async gameField(@Root() game: Game) {
+    return await GameField.findOne({ where: { game } });
+  }
+
+  @Mutation(() => Game)
+  async connectToGame(
+    @Ctx() { req }: MyContext,
+    @Arg("gameId") gameId: number
+  ) {
+    const game = await Game.findOne({ id: gameId });
+    if (
+      game?.p2id === 0 &&
+      !game?.status &&
+      game?.p1id !== req.session.userId
+    ) {
+      game.p2id = req.session.userId!;
+      Game.update({ id: gameId }, game);
+    }
+    return game;
+  }
+
+  @Mutation(() => Game)
+  async updateMyScore(
+    @Arg("gameId") gameId: number,
+    @Arg("isEnded") isEnded: boolean,
+    @Arg("score") score: number,
+    @Ctx() { req }: MyContext
+  ) {
+    const game = await Game.findOne({ id: gameId });
+    let isGameEnded = false;
+    if (game) {
+      if (isEnded) {
+        isGameEnded = true;
+      }
+      game.status = isGameEnded;
+      req.session.userId === game.p1id
+        ? (game.scoreP1 += score)
+        : (game.scoreP2 += score);
+      await Game.update({ id: gameId }, game);
+    }
+    return game;
+  }
+
   @Query(() => Game, { nullable: true })
   async getGame(@Arg("gameId") gameId: number, @Ctx() { req }: MyContext) {
-    console.log(req.session.userId);
     const game = await Game.findOne({ id: gameId });
-    if (game?.players?.filter((p) => p.id === req.session.userId).length) {
-      return game;
+    if (game && req.session.userId) {
+      if (this.players(game, req.session.userId)) {
+        return game;
+      }
     }
+
     console.log(
       `Game with id: ${gameId} and with player ${req.session.userId} in it was not found.`
     );
@@ -59,24 +107,18 @@ export class GameResolver {
   @Mutation(() => Game)
   async createGame(@Ctx() { req }: MyContext) {
     const initialWord = await generateRandomWord();
-    console.log(`initial word is generated: ${initialWord}`);
-
     await getConnection()
       .createQueryBuilder()
       .insert()
       .into(Game)
-      .values({      
+      .values({
         status: false,
-        initialWord: initialWord,
-        p1id: req.session.userId,        
+        initialWord,
+        p1id: req.session.userId,
       })
       .returning("*")
       .execute();
-  }
-
-  @Query(() => String)
-  async generateWord() {
-    const initialWord = await generateRandomWord();
-    return initialWord;
+    const game = await Game.findOne({ where: { initialWord } });
+    return game;
   }
 }

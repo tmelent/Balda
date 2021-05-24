@@ -1,12 +1,14 @@
 import { Field, ObjectType } from "type-graphql";
 import {
-  BaseEntity,
-  Entity,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
+  BaseEntity,   
+  Entity, 
+  JoinColumn, 
+  JoinTable, 
+  OneToOne, 
+  PrimaryColumn
 } from "typeorm";
 import { Game } from "./Game";
+
 import { Letter } from "./Letter";
 
 /**
@@ -16,14 +18,14 @@ import { Letter } from "./Letter";
 @Entity()
 export class GameField extends BaseEntity {
   @Field()
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryColumn()
+  gameId!: number;
 
-  @OneToOne(() => Game, (game) => game.gameField, {
-    onDelete: 'CASCADE'
-  })
-  game: Game;  
-   
-  @OneToMany(() => Letter, (letter) => letter.gameField)
+  @OneToOne(() => Game)
+  @JoinColumn()
+  game: Game
+  
+  @Field(() => [Letter!]!)  
+  @JoinTable() 
   letters: Letter[];
 }

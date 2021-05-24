@@ -4,12 +4,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { GameField } from "./GameField";
-import { User } from "./User";
 
 /**
  * Game entity. Has players and gameField in it.
@@ -30,32 +28,24 @@ export class Game extends BaseEntity {
   @Column()
   p1id: number;
 
-  @Field(() => Int)
+  @Field(() => Int, {nullable: true, defaultValue: 0})
   @Column({nullable: true, default: 0})
   p2id: number;
 
-  @Field(() => Int, {defaultValue: 0})
+  @Field(() => Int, {nullable: true, defaultValue: 0})
   @Column({nullable: true, default: 0})
   scoreP1: number;
 
-  @Field(() => Int, )
+  @Field(() => Int, {nullable: true, defaultValue: 0})
   @Column({nullable: true, default: 0})
   scoreP2: number;
 
   @Field(() => String, {nullable: false})
   @Column()
-  initialWord!: string;
-
-  // Players in game
-  @Field(() => User, {nullable: true})
-  @ManyToMany(() => User, (user) => user.games, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-  })
-  players?: User[];  
+  initialWord!: string;  
 
   // Every game has its own one game field
-  @OneToOne(() => GameField, (gameField) => gameField.game)
+  @OneToOne(() => GameField)
   gameField: GameField;
 
   // Is game finished?

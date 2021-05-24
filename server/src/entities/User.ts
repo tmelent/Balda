@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -36,6 +37,6 @@ export class User extends BaseEntity {
   @Column()
   password!: string;
 
-  @ManyToMany(() => Game, (game) => game.players)
+  @ManyToMany(() => Game) @JoinTable()
   games: Game[];
 }

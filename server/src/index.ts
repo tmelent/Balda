@@ -1,29 +1,30 @@
-import express from "express";
-import "reflect-metadata";
+import { ApolloServer } from "apollo-server-express";
+import connectRedis from "connect-redis";
 import cors from "cors";
+import express from "express";
+import session from "express-session";
+import { createServer } from "http";
+import Redis from "ioredis";
+import path from "path";
+import "reflect-metadata";
+import { Server, Socket } from "socket.io";
+import { buildSchema } from "type-graphql";
+// import { buildSchema } from "type-graphql";
+import { createConnection } from "typeorm";
 import {
   COOKIE_NAME,
   CORS_ORIGIN,
   PORT,
   __prod__,
 } from "../dev_constants/connections";
-import { createServer } from "http";
-import { Server, Socket } from "socket.io";
-// import { buildSchema } from "type-graphql";
-import { createConnection } from "typeorm";
-import path from "path";
-import session from "express-session";
-import Redis from "ioredis";
-import connectRedis from "connect-redis";
-import { ApolloServer } from "apollo-server-express";
-import { MyContext } from "./types";
 import { Game } from "./entities/Game";
 import { GameField } from "./entities/GameField";
 import { Letter } from "./entities/Letter";
 import { User } from "./entities/User";
-import { buildSchema } from "type-graphql";
-import { UserResolver } from "./resolvers/user";
 import { GameResolver } from "./resolvers/game";
+import { GameFieldResolver } from "./resolvers/gameField";
+import { UserResolver } from "./resolvers/user";
+import { MyContext } from "./types";
 
 const main = async () => {
   const conn = await createConnection({
@@ -34,7 +35,7 @@ const main = async () => {
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
-    entities: [User, GameField, Letter, Game],
+    entities: [User, GameField, Game, Letter],
   });
 
   await conn.runMigrations();
@@ -72,14 +73,14 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, GameResolver],
+      resolvers: [UserResolver, GameResolver, GameFieldResolver],
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({
       req,
       res,
       redis,
-    }), 
+    }),
     playground: true,
   });
 
