@@ -107,7 +107,7 @@ export class GameResolver {
   @Mutation(() => Game)
   async createGame(@Ctx() { req }: MyContext) {
     const initialWord = await generateRandomWord();
-    await getConnection()
+    const game = await getConnection()
       .createQueryBuilder()
       .insert()
       .into(Game)
@@ -117,8 +117,7 @@ export class GameResolver {
         p1id: req.session.userId,
       })
       .returning("*")
-      .execute();
-    const game = await Game.findOne({ where: { initialWord } });
-    return game;
+      .execute();    
+    return game.raw[0] as Game;
   }
 }

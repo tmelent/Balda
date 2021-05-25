@@ -10,7 +10,6 @@ import {
 } from "type-graphql";
 import { Game } from "../entities/Game";
 import { Letter } from "../entities/Letter";
-import { log } from "console";
 import { getConnection } from "typeorm";
 // import { createQueryBuilder } from "typeorm";
 
@@ -31,16 +30,14 @@ export class GameFieldResolver {
     @Arg("gameId") gameId: number
   ): Promise<GameField | null> {
     const game = await Game.findOne({ id: gameId });
-
-    log(`game: ${game?.id}`);
-    if (game) {
-      const word = game.initialWord;
-      log(`game exists: ${game.id}, ${game.initialWord}`);
+    const existingGameField = await GameField.findOne({where: {game}});    
+    if (game && !existingGameField) {
+      const word = game.initialWord;      
       const gameField = await getConnection().createQueryBuilder().insert().into(GameField).values({
         gameId: gameId
       }).returning("*").execute(); 
-      const res = gameField.raw[0] as GameField;
-      console.log(`${res.gameId}`);
+      const res = gameField.raw[0] as GameField;      
+
       const emptyLetter = (index: number) => {
         return {
           boxNumber: index,
@@ -68,6 +65,6 @@ export class GameFieldResolver {
 
       return res;     
     }
-    return null;
+    throw Error(existingGameField ? `GameField for this game already exists.` : `This game doesn't exist.`);
   }
 }
