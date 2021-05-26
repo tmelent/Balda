@@ -37,6 +37,7 @@ export class User extends BaseEntity {
   @Column()
   password!: string;
 
-  @ManyToMany(() => Game) @JoinTable()
+  @ManyToMany(() => Game, (game) => game.players, { cascade: true })
+  @JoinTable()
   games: Game[];
 }

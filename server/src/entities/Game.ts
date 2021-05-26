@@ -4,10 +4,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { GameField } from "./GameField";
+import { User } from "./User";
 
 /**
  * Game entity. Has players and gameField in it.
@@ -24,32 +26,31 @@ export class Game extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Field(() => Int, {nullable: false})
-  @Column()
-  p1id: number;
-
-  @Field(() => Int, {nullable: true, defaultValue: 0})
-  @Column({nullable: true, default: 0})
-  p2id: number;
-
-  @Field(() => Int, {nullable: true, defaultValue: 0})
-  @Column({nullable: true, default: 0})
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  @Column({ nullable: true, default: 0 })
   scoreP1: number;
 
-  @Field(() => Int, {nullable: true, defaultValue: 0})
-  @Column({nullable: true, default: 0})
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  @Column({ nullable: true, default: 0 })
   scoreP2: number;
 
-  @Field(() => String, {nullable: false})
+  @Field(() => String, { nullable: false })
   @Column()
-  initialWord!: string;  
+  initialWord!: string;
+
+  @Field(() => Number, {defaultValue: 0})
+  @Column({default: 0})
+  currentTurn: number;
+
+  @ManyToMany(() => User, (user) => user.games)
+  players: User[];
 
   // Every game has its own one game field
   @OneToOne(() => GameField)
   gameField: GameField;
 
   // Is game finished?
-  @Field(() => Boolean, {defaultValue: false})
-  @Column()
+  @Field(() => Boolean, { defaultValue: false })
+  @Column({ default: false })
   status: boolean;
 }
