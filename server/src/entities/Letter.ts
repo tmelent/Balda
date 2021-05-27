@@ -1,4 +1,4 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, InputType, ObjectType } from "type-graphql";
 import {
   BaseEntity,
   Column,
@@ -13,6 +13,7 @@ import { GameField } from "./GameField";
  * Letter entity.
  */
 @ObjectType()
+@InputType()
 @Entity()
 export class Letter extends BaseEntity {
   /** Number of the character's box. */
