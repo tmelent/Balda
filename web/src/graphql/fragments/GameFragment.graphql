@@ -1,0 +1,17 @@
+fragment GameFragment on Game {  
+    initialWord
+    gameField{
+      gameId
+      letters{
+        char
+        boxNumber
+      }
+    }
+    players{
+      id
+    }
+    scoreP1
+    scoreP2
+    createdAt
+    status    
+}

@@ -1,0 +1,5 @@
+query getGame ($gameId: Float!){
+  getGame(gameId:$gameId){   
+    ...GameFragment    
+  }
+}

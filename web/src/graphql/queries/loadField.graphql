@@ -1,0 +1,9 @@
+query loadField ($gameId: Float!) {
+  loadField(gameId: $gameId) {
+    gameId
+    letters {
+      char
+      boxNumber
+    }
+  }
+}

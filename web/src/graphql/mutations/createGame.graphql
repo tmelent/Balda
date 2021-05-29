@@ -1,0 +1,10 @@
+mutation createGame{
+  createGame{
+    initialWord
+    id   
+    status
+    players{
+      id
+    }
+  }
+}

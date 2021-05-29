@@ -1,0 +1,9 @@
+mutation Connect($gameId: Float!){
+  connectToGame(gameId: $gameId){
+    createdAt
+    scoreP1
+    scoreP2
+    initialWord
+    status    
+  }
+}

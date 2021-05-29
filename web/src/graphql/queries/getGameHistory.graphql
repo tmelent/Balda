@@ -1,0 +1,18 @@
+query getGameHistory {
+  getGameHistory {
+    id
+    initialWord
+    status
+    scoreP1
+    scoreP2
+    players {
+      id
+    }
+    currentTurn
+    gameField {
+      letters {
+        char
+      }
+    }
+  }
+}

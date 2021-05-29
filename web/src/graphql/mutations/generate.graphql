@@ -1,0 +1,8 @@
+mutation generate ($gameId: Float!) {
+  generateField(gameId: $gameId){
+    gameId
+    letters{
+      char
+    }
+  }
+}
