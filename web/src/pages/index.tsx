@@ -1,4 +1,7 @@
+import { withUrqlClient } from "next-urql";
 import React from "react";
+import { createUrqlClient } from "../utils/createUrqlClient";
+import { Layout } from "../components/common/Layout";
 
 // const io = require("socket.io-client");
 // const socket = io("https://api.example.com", {
@@ -8,10 +11,12 @@ import React from "react";
 //   }
 // });
 
-export default function Home() {
+export function Home() {
   return (
     <div className="app">
-      Web side is working fine
+      <Layout></Layout>
     </div>
-  )
+  );
 }
+
+export default withUrqlClient(createUrqlClient, {ssr: true})(Home);

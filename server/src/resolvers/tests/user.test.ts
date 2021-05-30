@@ -96,8 +96,7 @@ describe("Register", () => {
 
       if (response.errors) {
         console.log(response.errors);
-      }
-
+      }   
       loginExpect(response);
     });
     it("Logging in user with username", async () => {

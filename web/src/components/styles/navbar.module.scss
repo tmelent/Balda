@@ -1,0 +1,25 @@
+.navbarText {
+  font-size: 2.2rem;
+}
+
+.navbar {
+  justify-items: center;
+  z-index: 1;
+  position: sticky;
+  top: 0;
+  padding: 1rem;
+background: gray;
+  a {
+    text-decoration: none;
+    color: white;
+  }
+  
+}
+
+
+.logo {
+  font-size: 3.6rem;
+  &:hover {
+    cursor: pointer;
+  }
+}

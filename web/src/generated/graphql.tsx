@@ -1,7 +1,10 @@
+import gql from 'graphql-tag';
+import * as Urql from 'urql';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -235,10 +238,7 @@ export type LoginMutation = (
   { __typename?: 'Mutation' }
   & { login: (
     { __typename?: 'UserResponse' }
-    & { user?: Maybe<(
-      { __typename?: 'User' }
-      & Pick<User, 'username'>
-    )> }
+    & RegularUserResponseFragment
   ) }
 );
 
@@ -274,10 +274,7 @@ export type RegisterMutation = (
   { __typename?: 'Mutation' }
   & { register: (
     { __typename?: 'UserResponse' }
-    & { user?: Maybe<(
-      { __typename?: 'User' }
-      & Pick<User, 'username'>
-    )> }
+    & RegularUserResponseFragment
   ) }
 );
 
@@ -342,3 +339,194 @@ export type MeQuery = (
     & RegularUserFragment
   )> }
 );
+
+export const GameFragmentFragmentDoc = gql`
+    fragment GameFragment on Game {
+  initialWord
+  gameField {
+    gameId
+    letters {
+      char
+      boxNumber
+    }
+  }
+  players {
+    id
+  }
+  scoreP1
+  scoreP2
+  createdAt
+  status
+}
+    `;
+export const RegularErrorFragmentDoc = gql`
+    fragment RegularError on FieldError {
+  field
+  message
+}
+    `;
+export const RegularUserFragmentDoc = gql`
+    fragment RegularUser on User {
+  id
+  username
+}
+    `;
+export const RegularUserResponseFragmentDoc = gql`
+    fragment RegularUserResponse on UserResponse {
+  errors {
+    ...RegularError
+  }
+  user {
+    ...RegularUser
+  }
+}
+    ${RegularErrorFragmentDoc}
+${RegularUserFragmentDoc}`;
+export const ConnectDocument = gql`
+    mutation Connect($gameId: Float!) {
+  connectToGame(gameId: $gameId) {
+    createdAt
+    scoreP1
+    scoreP2
+    initialWord
+    status
+  }
+}
+    `;
+
+export function useConnectMutation() {
+  return Urql.useMutation<ConnectMutation, ConnectMutationVariables>(ConnectDocument);
+};
+export const CreateGameDocument = gql`
+    mutation createGame {
+  createGame {
+    initialWord
+    id
+    status
+    players {
+      id
+    }
+  }
+}
+    `;
+
+export function useCreateGameMutation() {
+  return Urql.useMutation<CreateGameMutation, CreateGameMutationVariables>(CreateGameDocument);
+};
+export const GenerateDocument = gql`
+    mutation generate($gameId: Float!) {
+  generateField(gameId: $gameId) {
+    gameId
+    letters {
+      char
+    }
+  }
+}
+    `;
+
+export function useGenerateMutation() {
+  return Urql.useMutation<GenerateMutation, GenerateMutationVariables>(GenerateDocument);
+};
+export const LoginDocument = gql`
+    mutation Login($usernameOrEmail: String!, $password: String!) {
+  login(usernameOrEmail: $usernameOrEmail, password: $password) {
+    ...RegularUserResponse
+  }
+}
+    ${RegularUserResponseFragmentDoc}`;
+
+export function useLoginMutation() {
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+};
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout
+}
+    `;
+
+export function useLogoutMutation() {
+  return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
+};
+export const MakeTurnDocument = gql`
+    mutation MakeTurn($confirmed: Boolean, $word: [CellInput!]!, $gameId: Float!) {
+  makeTurn(confirmed: $confirmed, word: $word, gameId: $gameId) {
+    ...GameFragment
+  }
+}
+    ${GameFragmentFragmentDoc}`;
+
+export function useMakeTurnMutation() {
+  return Urql.useMutation<MakeTurnMutation, MakeTurnMutationVariables>(MakeTurnDocument);
+};
+export const RegisterDocument = gql`
+    mutation Register($options: UsernamePasswordInput!) {
+  register(options: $options) {
+    ...RegularUserResponse
+  }
+}
+    ${RegularUserResponseFragmentDoc}`;
+
+export function useRegisterMutation() {
+  return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const GetGameDocument = gql`
+    query getGame($gameId: Float!) {
+  getGame(gameId: $gameId) {
+    ...GameFragment
+  }
+}
+    ${GameFragmentFragmentDoc}`;
+
+export function useGetGameQuery(options: Omit<Urql.UseQueryArgs<GetGameQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<GetGameQuery>({ query: GetGameDocument, ...options });
+};
+export const GetGameHistoryDocument = gql`
+    query getGameHistory {
+  getGameHistory {
+    id
+    initialWord
+    status
+    scoreP1
+    scoreP2
+    players {
+      id
+    }
+    currentTurn
+    gameField {
+      letters {
+        char
+      }
+    }
+  }
+}
+    `;
+
+export function useGetGameHistoryQuery(options: Omit<Urql.UseQueryArgs<GetGameHistoryQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<GetGameHistoryQuery>({ query: GetGameHistoryDocument, ...options });
+};
+export const LoadFieldDocument = gql`
+    query loadField($gameId: Float!) {
+  loadField(gameId: $gameId) {
+    gameId
+    letters {
+      char
+      boxNumber
+    }
+  }
+}
+    `;
+
+export function useLoadFieldQuery(options: Omit<Urql.UseQueryArgs<LoadFieldQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<LoadFieldQuery>({ query: LoadFieldDocument, ...options });
+};
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...RegularUser
+  }
+}
+    ${RegularUserFragmentDoc}`;
+
+export function useMeQuery(options: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<MeQuery>({ query: MeDocument, ...options });
+};
