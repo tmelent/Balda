@@ -1,7 +1,7 @@
 import { withUrqlClient } from "next-urql";
 import React from "react";
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { Layout } from "../components/common/Layout";
+import { Layout } from "../components/basic/Layout";
 
 // const io = require("socket.io-client");
 // const socket = io("https://api.example.com", {

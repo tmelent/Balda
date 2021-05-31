@@ -1,14 +1,18 @@
 .navbarText {
   font-size: 2.2rem;
+  color: white;
 }
 
 .navbar {
+  align-items: center;
   justify-items: center;
   z-index: 1;
   position: sticky;
   top: 0;
   padding: 1rem;
-background: gray;
+  background: rgb(56, 56, 56);
+  height: 6rem;
+
   a {
     text-decoration: none;
     color: white;
@@ -16,10 +20,18 @@ background: gray;
   
 }
 
-
 .logo {
-  font-size: 3.6rem;
+  font-family:'Amatic SC';
+  font-weight: 800;
+  font-size: 5rem !important;
   &:hover {
     cursor: pointer;
   }
 }
+
+.navWrap{
+  max-width: 800px;
+  width: 100%;
+  height: 100%;
+}
+

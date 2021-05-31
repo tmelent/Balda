@@ -1,0 +1,29 @@
+.form {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 50%;
+}
+
+.submitSection {
+  width: 100%;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4rem;
+  gap: 15rem;
+}
+
+.forgot {
+  &:hover {
+    text-decoration: underline;
+  }
+  cursor: pointer;
+}
+
+.submitBtn {
+  padding: 1.25rem 4rem !important;
+  background: rgb(85, 85, 85);
+  color: white;
+  border: none;
+}

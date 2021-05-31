@@ -1,122 +1,150 @@
 .alignCenter {
-    align-items: center;
+  align-items: center;
 }
 
-.mAuto{
-    margin: auto;
+.mAuto {
+  margin: auto;
 }
 
-.mlAuto{
-    margin-left: auto;
+.mlAuto {
+  margin-left: auto;
 }
 
-.mrAuto{
-    margin-right: auto;
+.mrAuto {
+  margin-right: auto;
 }
 
-.m0{
-    margin: 0;
+.gap4 {
+  display: flex;
+  gap: 4rem;
 }
 
-.p0{
-    padding: 0;
+.gap3 {
+  display: flex;
+  gap: 3rem;
 }
 
-.mr1{
-    margin-right: 0.25rem;
+.gap2 {
+  display: flex;
+  gap: 2rem;
 }
 
-.mr2{
-    margin-right:0.5rem;
+.m0 {
+  margin: 0;
 }
 
-.mr3{
-    margin-right:0.75rem;
+.p0 {
+  padding: 0;
 }
 
-.mr4{
-    margin-right: 1rem;
+.mr1 {
+  margin-right: 0.25rem;
 }
 
-.mr6{
-    margin-right: 1.5rem;
+.mr2 {
+  margin-right: 0.5rem;
+}
+
+.mr3 {
+  margin-right: 0.75rem;
+}
+
+.mr4 {
+  margin-right: 1rem;
+}
+
+.mr6 {
+  margin-right: 1.5rem;
 }
 
 .mr8 {
-    margin-right: 2rem;
+  margin-right: 2rem;
 }
 
-
-
-.ml1{
-    margin-left: 0.25rem;
+.ml1 {
+  margin-left: 0.25rem;
 }
 
-.ml2{
-    margin-left:0.5rem;
+.ml2 {
+  margin-left: 0.5rem;
 }
 
-.ml3{
-    margin-left:0.75rem;
+.ml3 {
+  margin-left: 0.75rem;
 }
 
-.ml4{
-    margin-left: 1rem;
+.ml4 {
+  margin-left: 1rem;
 }
 
-.ml6{
-    margin-left: 1.5rem;
+.ml6 {
+  margin-left: 1.5rem;
 }
 
 .ml8 {
-    margin-left: 2rem;
+  margin-left: 2rem;
 }
 
-
-.mt1{
-    margin-top: 0.25rem;
+.mt1 {
+  margin-top: 0.25rem;
 }
 
-.mt2{
-    margin-top:0.5rem;
+.mt2 {
+  margin-top: 0.5rem;
 }
 
-.mt3{
-    margin-top:0.75rem;
+.mt3 {
+  margin-top: 0.75rem;
 }
 
-.mt4{
-    margin-top: 1rem;
+.mt4 {
+  margin-top: 1rem;
 }
 
-.mt6{
-    margin-top: 1.5rem;
+.mt6 {
+  margin-top: 1.5rem;
 }
 
 .mt8 {
-    margin-top: 2rem;
+  margin-top: 2rem;
 }
 
-.mb1{
-    margin-bottom: 0.25rem;
+.mb1 {
+  margin-bottom: 0.25rem;
 }
 
-.mb2{
-    margin-bottom:0.5rem;
+.mb2 {
+  margin-bottom: 0.5rem;
 }
 
-.mb3{
-    margin-bottom:0.75rem;
+.mb3 {
+  margin-bottom: 0.75rem;
 }
 
-.mb4{
-    margin-bottom: 1rem;
+.mb4 {
+  margin-bottom: 1rem;
 }
 
-.mb6{
-    margin-bottom: 1.5rem;
+.mb6 {
+  margin-bottom: 1.5rem;
 }
 
 .mb8 {
-    margin-bottom: 2rem;
+  margin-bottom: 2rem;
+}
+
+.unselectable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.w100 {
+  width: 100%;
+}
+
+.pointer{
+    cursor:pointer;
 }
