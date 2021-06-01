@@ -50,8 +50,8 @@ export class GameFieldResolver {
 
       const arr = Array.from({ length: 25 }, (_, k) => emptyLetter(k));
 
-      for (let i = 9; i < 14; i++) {
-        arr[i].char = word[i - 9];
+      for (let i = 10; i < 15; i++) {
+        arr[i].char = word[i - 10];
         arr[i].filled = true;
       }      
         

@@ -16,7 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
     </button>
   ) : (
     <button {...props} onClick={onClick} type="submit">
-      Loading...
+      Загрузка...
     </button>
   );
 };

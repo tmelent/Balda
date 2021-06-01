@@ -154,11 +154,11 @@ export type GameFragmentFragment = (
     & Pick<GameField, 'gameId'>
     & { letters: Array<(
       { __typename?: 'Letter' }
-      & Pick<Letter, 'char' | 'boxNumber'>
+      & Pick<Letter, 'id' | 'char' | 'boxNumber' | 'filled' | 'isNew'>
     )> }
   ), players?: Maybe<Array<(
     { __typename?: 'User' }
-    & Pick<User, 'id'>
+    & Pick<User, 'id' | 'username'>
   )>> }
 );
 
@@ -181,6 +181,20 @@ export type RegularUserResponseFragment = (
     { __typename?: 'User' }
     & RegularUserFragment
   )> }
+);
+
+export type ChangePasswordMutationVariables = Exact<{
+  token: Scalars['String'];
+  newPassword: Scalars['String'];
+}>;
+
+
+export type ChangePasswordMutation = (
+  { __typename?: 'Mutation' }
+  & { changePassword: (
+    { __typename?: 'UserResponse' }
+    & RegularUserResponseFragment
+  ) }
 );
 
 export type ConnectMutationVariables = Exact<{
@@ -209,6 +223,16 @@ export type CreateGameMutation = (
       & Pick<User, 'id'>
     )>> }
   ) }
+);
+
+export type ForgotPasswordMutationVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type ForgotPasswordMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'forgotPassword'>
 );
 
 export type GenerateMutationVariables = Exact<{
@@ -346,12 +370,16 @@ export const GameFragmentFragmentDoc = gql`
   gameField {
     gameId
     letters {
+      id
       char
       boxNumber
+      filled
+      isNew
     }
   }
   players {
     id
+    username
   }
   scoreP1
   scoreP2
@@ -382,6 +410,17 @@ export const RegularUserResponseFragmentDoc = gql`
 }
     ${RegularErrorFragmentDoc}
 ${RegularUserFragmentDoc}`;
+export const ChangePasswordDocument = gql`
+    mutation ChangePassword($token: String!, $newPassword: String!) {
+  changePassword(token: $token, newPassword: $newPassword) {
+    ...RegularUserResponse
+  }
+}
+    ${RegularUserResponseFragmentDoc}`;
+
+export function useChangePasswordMutation() {
+  return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
 export const ConnectDocument = gql`
     mutation Connect($gameId: Float!) {
   connectToGame(gameId: $gameId) {
@@ -412,6 +451,15 @@ export const CreateGameDocument = gql`
 
 export function useCreateGameMutation() {
   return Urql.useMutation<CreateGameMutation, CreateGameMutationVariables>(CreateGameDocument);
+};
+export const ForgotPasswordDocument = gql`
+    mutation ForgotPassword($email: String!) {
+  forgotPassword(email: $email)
+}
+    `;
+
+export function useForgotPasswordMutation() {
+  return Urql.useMutation<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument);
 };
 export const GenerateDocument = gql`
     mutation generate($gameId: Float!) {

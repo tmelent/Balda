@@ -5,14 +5,14 @@ interface FlexProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 export const Flex: React.FC<FlexProps> = ({
   directionRow = true,
-
   children,
   ...attributes
 }) => {
   return (
     <div
-      className={`${attributes.className} ${styles.flex} ${directionRow ? null : styles.flexColumn}`}
-    
+      className={`${attributes.className} ${styles.flex} ${
+        directionRow ? null : styles.flexColumn
+      }`}
     >
       {children}
     </div>

@@ -5,7 +5,7 @@ import React, {
   TextareaHTMLAttributes,
 } from "react";
 import styles from "../styles/forms.module.scss";
-
+import { FormControl } from "./FormControl";
 type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   name: string;
@@ -19,14 +19,10 @@ export const InputField: React.FC<InputFieldProps> = ({
   ...props
 }) => {
   const [field, { error }] = useField(props);
-  return (
-    // <FormControl isInvalid={!!error}>
-    //   <FormLabel htmlFor={field.name}>{label}</FormLabel>
-    //   <InputOrTextarea {...field} {...props} id={field.name} />
-    //   {error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
-    // </FormControl>
-    <div className={`formRow ${styles.form}`}>
-      <label htmlFor={field.name} className={styles.label}>{label}</label>
+  return (<div className={styles.formWrap}>  
+    
+    <FormControl isInvalid={!!error} className={`formRow ${styles.formControl}`}>
+      
       {textarea ? (
         <textarea
           {...field}
@@ -38,7 +34,9 @@ export const InputField: React.FC<InputFieldProps> = ({
         />
       ) : (
         <input className={`${styles.formInput}`} {...field} {...props} id={field.name} />
-      )}
+      )}      
+    </FormControl>
+    {error ? <span className={styles.validationError}>{error}</span> : null}
     </div>
   );
 };

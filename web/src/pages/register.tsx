@@ -1,33 +1,30 @@
 import { Form, Formik } from "formik";
 import { withUrqlClient } from "next-urql";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { Button } from "../components/basic/Button";
-import { Link } from "../components/basic/Link";
+import { Wrapper } from "../components/basic/Wrapper";
 import { InputField } from "../components/forms/InputField";
+import { NavBar } from "../components/NavBar";
 import styles from "../components/styles/login.module.scss";
 import utilStyles from "../components/styles/utility.module.scss";
-import { useLoginMutation } from "../generated/graphql";
+import { useRegisterMutation } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { toErrorMap } from "../utils/toErrorMap";
-import { Text } from "../components/basic/Text";
-import { NavBar } from "../components/NavBar";
-import { Wrapper } from "../components/basic/Wrapper";
-export const Login: React.FC<{}> = ({}) => {
+export const Register: React.FC<{}> = ({}) => {
   const router = useRouter();
-  const [, login] = useLoginMutation();
+  const [, register] = useRegisterMutation();
   return (
     <>
       <NavBar />
       <Wrapper variant="small">
         <Formik
-          initialValues={{ usernameOrEmail: "", password: "" }}
+          initialValues={{ email: "", username: "", password: "" }}
           onSubmit={async (values, { setErrors }) => {
-            const response = await login(values);
-            if (response.data?.login.errors) {
-              setErrors(toErrorMap(response.data.login.errors));
-            } else if (response.data?.login.user) {
+            const response = await register({ options: values });
+            if (response.data?.register.errors) {
+              setErrors(toErrorMap(response.data.register.errors));
+            } else if (response.data?.register.user) {
               if (typeof router.query.next === "string") {
                 router.push(router.query.next);
               } else {
@@ -39,9 +36,16 @@ export const Login: React.FC<{}> = ({}) => {
           {({ isSubmitting }) => (
             <Form className={styles.form}>
               <InputField
-                name="usernameOrEmail"
-                placeholder="логин или e-mail"
+                name="username"
+                placeholder="логин"
                 label="логин или e-mail"
+              />
+               <div className={utilStyles.mt4} />
+              <InputField
+                name="email"
+                placeholder="e-mail"
+                label="e-mail"
+                type="email"
               />
               <div className={utilStyles.mt4} />
               <InputField
@@ -50,15 +54,10 @@ export const Login: React.FC<{}> = ({}) => {
                 label="пароль"
                 type="password"
               />
+             
               <div className={styles.submitSection}>
-                <NextLink href="/forgot-password">
-                  <Link>
-                    <Text className={styles.forgot}>Забыли пароль?</Text>
-                  </Link>
-                </NextLink>
-
                 <Button isLoading={isSubmitting} className={styles.submitBtn}>
-                  Войти
+                  Отправить
                 </Button>
               </div>
             </Form>
@@ -69,4 +68,4 @@ export const Login: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Login);
+export default withUrqlClient(createUrqlClient)(Register);

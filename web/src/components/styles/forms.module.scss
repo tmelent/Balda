@@ -1,13 +1,37 @@
-.label{
-    display: inline-block;
-    max-width: 15rem;
-    padding-right: 5rem;
-    text-align:left;
-    width: 100%;
-    font-size: 1.75rem;
+// .label {
+//   align-items: center;
+//   justify-content: left;
+//   display: flex;
+//   padding-right: 10rem;
+//   max-width: 15rem;
+//   width: 100%;
+//   font-size: 1.75rem;
+// }
+
+.formInput {
+  margin-left: auto;
+  //   display: flex;
+  padding: 1rem;
+  //   height: 2rem;
+  width: 100%;
 }
 
-.formInput{
-    padding:1rem;
-    width: 20rem;
+.formControl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.validationError {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  display: block;
+  text-align: right;
+  font-weight: 500;
+  color: #e63333;
+}
+
+.formWrap {
+  min-height: 7rem;
 }

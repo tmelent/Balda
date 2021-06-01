@@ -3,12 +3,16 @@ fragment GameFragment on Game {
     gameField{
       gameId
       letters{
+        id
         char
         boxNumber
+        filled
+        isNew
       }
     }
     players{
       id
+      username
     }
     scoreP1
     scoreP2

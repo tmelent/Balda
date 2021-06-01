@@ -1,17 +1,19 @@
 .form {
   text-align: center;
   font-size: 1.5rem;
-  margin-top: 50%;
+  margin-top: calc(50% + 8rem);
+  
 }
 
 .submitSection {
-  width: 100%;
-  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  // width: 42rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 4rem;
-  gap: 15rem;
+  // gap: 15rem;
 }
 
 .forgot {
@@ -22,7 +24,10 @@
 }
 
 .submitBtn {
-  padding: 1.25rem 4rem !important;
+  width: 10rem;
+  height: 4rem;
+  margin-left: auto;
+  cursor: pointer;
   background: rgb(85, 85, 85);
   color: white;
   border: none;
