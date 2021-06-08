@@ -31,6 +31,8 @@ export type Game = {
   __typename?: 'Game';
   id: Scalars['Float'];
   createdAt: Scalars['String'];
+  p1wordlist?: Maybe<Array<Scalars['String']>>;
+  p2wordlist?: Maybe<Array<Scalars['String']>>;
   scoreP1?: Maybe<Scalars['Int']>;
   scoreP2?: Maybe<Scalars['Int']>;
   initialWord: Scalars['String'];
@@ -148,7 +150,7 @@ export type UsernamePasswordInput = {
 
 export type GameFragmentFragment = (
   { __typename?: 'Game' }
-  & Pick<Game, 'initialWord' | 'scoreP1' | 'scoreP2' | 'createdAt' | 'status'>
+  & Pick<Game, 'initialWord' | 'scoreP1' | 'scoreP2' | 'p1wordlist' | 'p2wordlist' | 'createdAt' | 'status' | 'currentTurn'>
   & { gameField: (
     { __typename?: 'GameField' }
     & Pick<GameField, 'gameId'>
@@ -383,8 +385,11 @@ export const GameFragmentFragmentDoc = gql`
   }
   scoreP1
   scoreP2
+  p1wordlist
+  p2wordlist
   createdAt
   status
+  currentTurn
 }
     `;
 export const RegularErrorFragmentDoc = gql`

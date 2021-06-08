@@ -25,6 +25,8 @@ import { GameResolver } from "./resolvers/game";
 import { GameFieldResolver } from "./resolvers/gameField";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
+import { GraphQLUtil } from "./utils/gqlCall";
+import {MAKE_TURN} from "./graphql/mutations";
 
 const main = async () => {
   const conn = await createConnection({
@@ -71,11 +73,15 @@ const main = async () => {
     })
   );
 
+  const gqlSchema = await buildSchema({
+    resolvers: [UserResolver, GameResolver, GameFieldResolver],
+    validate: false,
+  });
+
+  const graphqlUtil = new GraphQLUtil(gqlSchema);
+
   const apolloServer = new ApolloServer({
-    schema: await buildSchema({
-      resolvers: [UserResolver, GameResolver, GameFieldResolver],
-      validate: false,
-    }),
+    schema: gqlSchema,
     context: ({ req, res }): MyContext => ({
       req,
       res,
@@ -103,6 +109,15 @@ const main = async () => {
 
   io.on("connection", (socket: Socket) => {
     console.log(`New connection: ${socket.id}`);
+    io.emit("playerConnected", socket.id);
+    socket.on("turnConfirmed", (data) => {
+      const { word, gameId } = data;
+      graphqlUtil.call({
+        source: MAKE_TURN,
+        userId: data.userId,
+        variableValues: { confirmed: true, word, gameId },
+      });
+    });
   });
 
   httpServer.listen(PORT, () => {

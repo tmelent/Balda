@@ -1,6 +1,7 @@
 .navbarText {
   font-size: 2.2rem;
   color: white;
+  
 }
 
 .navbar {
@@ -9,29 +10,30 @@
   z-index: 1;
   position: sticky;
   top: 0;
-  padding: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   background: rgb(56, 56, 56);
   height: 6rem;
 
   a {
     text-decoration: none;
     color: white;
-  }
   
+  }
 }
 
 .logo {
-  font-family:'Amatic SC';
+  font-family: "Amatic SC";
   font-weight: 800;
   font-size: 5rem !important;
   &:hover {
     cursor: pointer;
   }
+  
 }
 
-.navWrap{
+.navWrap {
   max-width: 800px;
   width: 100%;
   height: 100%;
 }
-

@@ -25,6 +25,13 @@ export class Game extends BaseEntity {
   @Field(() => String)
   @CreateDateColumn()
   createdAt: Date;
+  @Field(() => [String], { defaultValue: [""] })
+  @Column("varchar", { default: [""], array: true })
+  p1wordlist: string[];
+
+  @Field(() => [String], {  defaultValue: [""] })
+  @Column("varchar", { default: [""], array: true })
+  p2wordlist: string[];
 
   @Field(() => Int, { nullable: true, defaultValue: 0 })
   @Column({ nullable: true, default: 0 })
@@ -38,8 +45,8 @@ export class Game extends BaseEntity {
   @Column()
   initialWord!: string;
 
-  @Field(() => Number, {defaultValue: 0})
-  @Column({default: 0})
+  @Field(() => Number, { defaultValue: 0 })
+  @Column({ default: 0 })
   currentTurn: number;
 
   @ManyToMany(() => User, (user) => user.games)

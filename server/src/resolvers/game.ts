@@ -132,12 +132,20 @@ export class GameResolver {
             }
           });
 
+          if (
+            game.p1wordlist.includes(stringWord) ||
+            game.p2wordlist.includes(stringWord) ||
+            stringWord === game.initialWord
+          ) {
+            throw new Error("Word has been already used in game.");
+          }
+
           if (!newLetter) {
             throw new Error("There is no new cell.");
           }
 
           // Destructuring to reduce amount of code
-          const { char, filled, isNew, boxNumber } = newLetter;
+          const { char, boxNumber } = newLetter;
 
           const emptyCell = await Letter.findOne({
             where: { boxNumber, gameField },
@@ -152,12 +160,23 @@ export class GameResolver {
 
           if (dictionary.includes(stringWord) || confirmed) {
             // Word is approved or exists in DB.
-
+            if (
+              game.p1wordlist === undefined ||
+              game.p2wordlist === undefined
+            ) {
+              game.p1wordlist = [];
+              game.p2wordlist = [];
+            }
             // Updating score
-            playerNum === 0
-              ? (game.scoreP1 += stringWord.length)
-              : (game.scoreP2 += stringWord.length);
+            if (playerNum === 0) {
+              game.scoreP1 += stringWord.length;
+              game.p1wordlist.push(stringWord);
+            } else {
+              game.scoreP2 += stringWord.length;
+              game.p2wordlist.push(stringWord);
+            }
 
+            game.currentTurn = playerNum === 0 ? 1 : 0;
             // Updating game
             const updatedGame = await getRepository(Game).save(game);
 
@@ -165,8 +184,8 @@ export class GameResolver {
             await getRepository(Letter).save({
               id: emptyCell.id,
               char,
-              filled,
-              isNew,
+              filled: true,
+              isNew: false,
               boxNumber,
               gameField,
             });
@@ -237,8 +256,11 @@ export class GameResolver {
     if (currUser) {
       const game = await getRepository(Game).save({
         initialWord,
+        p1wordList: [""],
+        p2wordList: [""],
       });
       currUser.games = [...currUser.games, game];
+
       await getRepository(User).save(currUser);
       return await getRepository(Game)
         .createQueryBuilder("game")

@@ -16,6 +16,9 @@ fragment GameFragment on Game {
     }
     scoreP1
     scoreP2
+    p1wordlist
+    p2wordlist
     createdAt
-    status    
+    status   
+    currentTurn 
 }

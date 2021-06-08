@@ -4,6 +4,10 @@ import { Letter } from "./Letter";
 
 @InputType()
 export class CellInput implements Partial<Letter> {
+
+  @Field(() => Int)
+  id: number;
+
   @Field(() => Int)
   boxNumber: number;
 
