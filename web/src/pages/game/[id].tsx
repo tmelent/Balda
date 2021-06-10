@@ -14,7 +14,6 @@ import styles from "../../components/styles/gameField.module.scss";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import socketIOClient from "socket.io-client";
 import { isServer } from "src/utils/isServer";
-import Router from "next/router";
 import { Keyboard } from "../../components/keyboard/Keyboard";
 
 const Game = ({}) => {
@@ -32,7 +31,7 @@ const Game = ({}) => {
   // Hooks
   const [meData] = useMeQuery({ pause: isServer() });
   const [, makeTurn] = useMakeTurnMutation();
-  const [{ data, fetching }] = useGetGameFromUrl();
+  const [{ data, fetching,}] = useGetGameFromUrl();
 
   const [letterState, updateState] = useState(letterInitialState);
   /**
@@ -49,7 +48,7 @@ const Game = ({}) => {
     socket.on("confirmationRequired", (data) => {
       alert(`allow ${data.word}?`);
     });
-  }, []);
+  });
 
   // Fetching
   if (fetching) {
@@ -121,8 +120,7 @@ const Game = ({}) => {
     togglePhase({
       cell: null,
       phase: "insertion",
-    });
-    Router.router?.reload();
+    });    
   };
   const handleField = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,

@@ -1,7 +1,6 @@
 import { withUrqlClient } from "next-urql";
 import * as React from "react";
 import { createUrqlClient } from "src/utils/createUrqlClient";
-import { Button } from "../basic/Button";
 import { Flex } from "../basic/Flex";
 import styles from "../styles/keyboard.module.scss";
 import utilStyles from "../styles/utility.module.scss";
@@ -15,7 +14,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
   turn,
   handleFunction,
   resetFunction,
-  sendFunction
+  sendFunction,
 }) => {
   // Cyrillic alphabet
   // Note: ё === е, и === й
@@ -72,13 +71,13 @@ export const Keyboard: React.FC<KeyboardProps> = ({
         >
           Отправить
         </div>
-     
-      <div
-        className={`${styles.deleteBtn} ${utilStyles.unselectable} ${utilStyles.warningBtn}`}
-        onClick={() => resetFunction()}
-      >
-        Очистить
-      </div>
+
+        <div
+          className={`${styles.deleteBtn} ${utilStyles.unselectable} ${utilStyles.warningBtn}`}
+          onClick={() => resetFunction()}
+        >
+          Очистить
+        </div>
       </Flex>
       <div className={styles.keyboard} hidden={!turn}>
         {rows.map((row, i) => {
