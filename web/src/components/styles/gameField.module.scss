@@ -32,11 +32,39 @@
     color: white;
     transition: all 0.3s ease;
   }
-  
+  cursor: pointer;
 }
-.cellActive{
+.cellActive {
   background-color: rgb(95, 120, 189);
   color: white;
+}
+
+@mixin backgroundGradAnimation {
+  animation: animatedgradient 5s ease alternate infinite;
+  background-size: 300% 300%;
+  @keyframes animatedgradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
+
+.previewCellActive {
+  background: linear-gradient(60deg, #4ca1af, #c4e0e5);
+  color: white;
+  @include backgroundGradAnimation;
+}
+
+.previewCellChosen {
+  background: linear-gradient(60deg, #ff5f6d, #ffc371, #ff5f6d, #ffc371);
+  color: white;
+  @include backgroundGradAnimation;
 }
 .cellText {
   -webkit-user-select: none;

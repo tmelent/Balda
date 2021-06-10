@@ -1,75 +1,104 @@
 import { withUrqlClient } from "next-urql";
-import { send } from "process";
 import * as React from "react";
 import { createUrqlClient } from "src/utils/createUrqlClient";
+import { Button } from "../basic/Button";
 import { Flex } from "../basic/Flex";
 import styles from "../styles/keyboard.module.scss";
 import utilStyles from "../styles/utility.module.scss";
 interface KeyboardProps {
   turn: boolean;
+  handleFunction: Function;
+  resetFunction: Function;
+  sendFunction: Function;
 }
-export const Keyboard: React.FC<KeyboardProps> = ({ turn }) => {
+export const Keyboard: React.FC<KeyboardProps> = ({
+  turn,
+  handleFunction,
+  resetFunction,
+  sendFunction
+}) => {
   // Cyrillic alphabet
   // Note: ё === е, и === й
   const keys = [
-    "а",
-    "б",
-    "в",
-    "г",
-    "д",
-    "е",
-    "ж",
-    "з",
-    "и",
-    "к",
-    "л",
-    "м",
-    "н",
-    "о",
-    "п",
-    "р",
-    "с",
-    "т",
-    "у",
-    "ф",
-    "х",
+    "й",
     "ц",
-    "ч",
+    "у",
+    "к",
+    "е",
+    "н",
+    "г",
     "ш",
     "щ",
+    "з",
+    "х",
     "ъ",
+    "ф",
     "ы",
-    "ь",
+    "в",
+    "а",
+    "п",
+    "р",
+    "о",
+    "л",
+    "д",
+    "ж",
     "э",
-    "ю",
     "я",
+    "ч",
+    "с",
+    "м",
+    "и",
+    "т",
+    "ь",
+    "б",
+    "ю",
   ];
 
-  const send = (key: string) => {
-    return key;
+  const handleClick = (key: string) => {
+    console.log(`${key} pressed. Handling...`);
+    handleFunction(key);
   };
-  var rows = [];
-  for (var i = 0; i < keys.length; i += 11) {
-    rows.push(keys.slice(i, 11 + i));
-  }
 
-  console.log(rows);
+  var rows = [];
+  rows.push(keys.slice(0, 12));
+  rows.push(keys.slice(12, 23));
+  rows.push(keys.slice(23));
   return (
-    <div >
-      {rows.map((row, i) => {
-        return (
-          <Flex className={`${utilStyles.alignCenter}`} key={`keyboardRow-${i}`}>
-            {console.log(row)}
-            {row.map((key, idx) => {
-              return (
-                <div className={styles.key} key={`key-${idx}`}>
-                  {key}
-                </div>
-              );
-            })}
-          </Flex>
-        );
-      })}
+    <div className={styles.keyboardWrap}>
+      <Flex className={styles.buttonsWrap}>
+        <div
+          className={`${styles.submitBtn} ${utilStyles.unselectable}`}
+          onClick={async () => await sendFunction()}
+        >
+          Отправить
+        </div>
+     
+      <div
+        className={`${styles.deleteBtn} ${utilStyles.unselectable} ${utilStyles.warningBtn}`}
+        onClick={() => resetFunction()}
+      >
+        Очистить
+      </div>
+      </Flex>
+      <div className={styles.keyboard} hidden={!turn}>
+        {rows.map((row, i) => {
+          return (
+            <Flex className={`${styles.keyboardRow}`} key={`keyboardRow-${i}`}>
+              {row.map((key, idx) => {
+                return (
+                  <div
+                    className={`${styles.key} ${utilStyles.unselectable}`}
+                    key={`key-${idx}`}
+                    onClick={() => handleClick(key)}
+                  >
+                    {key.toUpperCase()}
+                  </div>
+                );
+              })}
+            </Flex>
+          );
+        })}
+      </div>
     </div>
   );
 };

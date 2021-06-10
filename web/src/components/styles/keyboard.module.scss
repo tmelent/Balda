@@ -1,0 +1,79 @@
+.key {
+  font-size: 3.5rem;
+  width: 6rem;
+  height: 6rem;
+
+  margin: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(207, 207, 207);
+  cursor: pointer;
+  border-radius: 1.2rem;
+  -webkit-box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
+  -moz-box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
+  box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
+  transition: 0.3s ease all;
+
+  &:hover {
+    scale: 115%;
+  }
+  &:active {
+    background-color: rgb(156, 156, 209);
+    scale: 120%;
+  }
+}
+
+.buttonsWrap {
+  width: 100%;
+  gap: 2rem;
+}
+
+.keyboardWrap{
+  margin-top: 4rem;
+}
+@mixin btn-darken($bg) {
+  transition: 0.3s ease-in-out all;
+  &:hover {
+    background-color: darken($bg, 12%);
+  }
+}
+
+.deleteBtn {
+  cursor: pointer;
+  font-size: 2rem;
+  padding: 1rem;
+  width: 12rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.2rem;
+  color: white;
+  @include btn-darken(rgb(204, 42, 42));
+}
+.submitBtn {
+  @include btn-darken(#4ca1af);
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 2rem;
+  padding: 1rem;
+  width: 12rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.2rem;
+  color: white;
+  background-color: #4ca1af;
+}
+.keyboardRow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.keyboard {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}

@@ -127,11 +127,12 @@ export class GameResolver {
             // Creating word from array items
             stringWord += i.char;
             // Checking if array has new cell
-            if (!i.filled && i.isNew) {
+            if (i.isNew) {
               newLetter = i;
             }
           });
 
+          console.log(`stringWord: ${stringWord}`);
           if (
             game.p1wordlist.includes(stringWord) ||
             game.p2wordlist.includes(stringWord) ||
@@ -140,7 +141,7 @@ export class GameResolver {
             throw new Error("Word has been already used in game.");
           }
 
-          if (!newLetter) {
+          if (newLetter === null) {
             throw new Error("There is no new cell.");
           }
 
