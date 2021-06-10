@@ -150,7 +150,7 @@ export type UsernamePasswordInput = {
 
 export type GameFragmentFragment = (
   { __typename?: 'Game' }
-  & Pick<Game, 'initialWord' | 'scoreP1' | 'scoreP2' | 'p1wordlist' | 'p2wordlist' | 'createdAt' | 'status' | 'currentTurn'>
+  & Pick<Game, 'id' | 'initialWord' | 'scoreP1' | 'scoreP2' | 'p1wordlist' | 'p2wordlist' | 'createdAt' | 'status' | 'currentTurn'>
   & { gameField: (
     { __typename?: 'GameField' }
     & Pick<GameField, 'gameId'>
@@ -368,6 +368,7 @@ export type MeQuery = (
 
 export const GameFragmentFragmentDoc = gql`
     fragment GameFragment on Game {
+  id
   initialWord
   gameField {
     gameId
