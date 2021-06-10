@@ -109,7 +109,14 @@ const main = async () => {
 
   io.on("connection", (socket: Socket) => {
     console.log(`New connection: ${socket.id}`);
-    io.emit("playerConnected", socket.id);
+    socket.on("connectionToRoom", (gameId) => {
+      io.socketsJoin(`${gameId}`);
+      console.log(`player ${socket.id} joined room: ${gameId}`)
+      io.to(`${gameId}`).emit("playerJoined", socket.id, gameId);
+    })
+    socket.on("fieldUpdated", (room) => {
+      io.to(`${room}`).emit("updateGame");
+    })
     socket.on("turnConfirmed", (data) => {
       const { word, gameId } = data;
       graphqlUtil.call({

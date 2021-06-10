@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import socketIOClient from "socket.io-client";
+import socketIOClient, { io } from "socket.io-client";
 import { PlayerTable } from "src/components/game/PlayerTable";
 import { isServer } from "src/utils/isServer";
 import { useGetGameFromUrl } from "src/utils/useGetGameFromUrl";
+import { useGetIntId } from "src/utils/useGetIntId";
 import { withApollo } from "src/utils/withApollo";
 import { Layout } from "../../components/basic/Layout";
 import { Text } from "../../components/basic/Text";
@@ -29,26 +30,29 @@ const Game = ({}) => {
   };
 
   // Hooks
+  const { data, loading, refetch } = useGetGameFromUrl();
   const meData = useMeQuery({ skip: isServer() });
   const [makeTurn] = useMakeTurnMutation();
-  const { data, loading, refetch } = useGetGameFromUrl();
   const [letters, updateLetters] = useState(lettersInitial);
   const [letterState, updateState] = useState(letterInitialState);
+  const [connection, makeConnection] = useState(false);
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
    * "selection" phase - can't insert values, can only select filled cells (and new one too)
    */
   const [phaseState, togglePhase] = useState(phaseInitialState);
-
+  const socket = socketIOClient("localhost:4000");
   useEffect(() => {
-    const socket = socketIOClient("localhost:4000");
     socket.on("playerConnected", (data) => {
       console.log(`player ${data} connected`);
     });
-    socket.on("confirmationRequired", (data) => {
-      alert(`allow ${data.word}?`);
+    socket.on("playerJoined", (sId, gameId) => {
+      console.log(`player: ${sId}, socketId: ${socket.id}, gameId: ${gameId}`);
     });
-  });
+    socket.on("updateGame", () => {
+      refetch();
+    });
+  }, []);
 
   // Fetching
   if (loading) {
@@ -67,7 +71,11 @@ const Game = ({}) => {
       </Layout>
     );
   }
-
+  console.log(`your socket: ${socket.id}`);
+  if (!connection) {
+    socket.emit("connectionToRoom", data!.getGame!.id);
+    makeConnection(true);
+  }
   if (letters.length === 0) {
     console.log(`reparsing:`);
     console.log(letters);
@@ -88,11 +96,15 @@ const Game = ({}) => {
     if (some) {
       await makeTurn({
         variables: {
-          gameId: 1,
+          gameId: data.getGame!.id,
           confirmed: false,
           word: letterState as CellInput[],
         },
       });
+      updateLetters(data.getGame!.gameField.letters);
+      socket.emit("fieldUpdated", data.getGame!.id);
+      resetInsertion();
+      refetch();      
       return;
     }
   };

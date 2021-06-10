@@ -1,24 +1,25 @@
-fragment GameFragment on Game {  
-    initialWord
-    gameField{
-      gameId
-      letters{
-        id
-        char
-        boxNumber
-        filled
-        isNew
-      }
-    }
-    players{
+fragment GameFragment on Game {
+  id
+  initialWord
+  gameField {
+    gameId
+    letters {
       id
-      username
+      char
+      boxNumber
+      filled
+      isNew
     }
-    scoreP1
-    scoreP2
-    p1wordlist
-    p2wordlist
-    createdAt
-    status   
-    currentTurn 
+  }
+  players {
+    id
+    username
+  }
+  scoreP1
+  scoreP2
+  p1wordlist
+  p2wordlist
+  createdAt
+  status
+  currentTurn
 }
