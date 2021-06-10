@@ -1,23 +1,23 @@
-import { withUrqlClient } from "next-urql";
 import React, { useEffect, useState } from "react";
+import socketIOClient from "socket.io-client";
 import { PlayerTable } from "src/components/game/PlayerTable";
+import { isServer } from "src/utils/isServer";
+import { useGetGameFromUrl } from "src/utils/useGetGameFromUrl";
+import { withApollo } from "src/utils/withApollo";
+import { Layout } from "../../components/basic/Layout";
+import { Text } from "../../components/basic/Text";
+import { Keyboard } from "../../components/keyboard/Keyboard";
+import styles from "../../components/styles/gameField.module.scss";
 import {
   CellInput,
   Letter,
   useMakeTurnMutation,
   useMeQuery,
 } from "../../generated/graphql";
-import { useGetGameFromUrl } from "src/utils/useGetGameFromUrl";
-import { Layout } from "../../components/basic/Layout";
-import { Text } from "../../components/basic/Text";
-import styles from "../../components/styles/gameField.module.scss";
-import { createUrqlClient } from "../../utils/createUrqlClient";
-import socketIOClient from "socket.io-client";
-import { isServer } from "src/utils/isServer";
-import { Keyboard } from "../../components/keyboard/Keyboard";
 
 const Game = ({}) => {
   // Initial states and typings
+  let lettersInitial: Letter[] = [];
   type PhaseState = {
     phase: string;
     cell: CellInput | null;
@@ -29,10 +29,10 @@ const Game = ({}) => {
   };
 
   // Hooks
-  const [meData] = useMeQuery({ pause: isServer() });
-  const [, makeTurn] = useMakeTurnMutation();
-  const [{ data, fetching,}] = useGetGameFromUrl();
-
+  const meData = useMeQuery({ skip: isServer() });
+  const [makeTurn] = useMakeTurnMutation();
+  const { data, loading, refetch } = useGetGameFromUrl();
+  const [letters, updateLetters] = useState(lettersInitial);
   const [letterState, updateState] = useState(letterInitialState);
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
@@ -51,7 +51,7 @@ const Game = ({}) => {
   });
 
   // Fetching
-  if (fetching) {
+  if (loading) {
     return (
       <Layout>
         <Text>Загрузка...</Text>
@@ -68,7 +68,13 @@ const Game = ({}) => {
     );
   }
 
-  let letters = data.getGame.gameField.letters;
+  if (letters.length === 0) {
+    console.log(`reparsing:`);
+    console.log(letters);
+    updateLetters(
+      JSON.parse(JSON.stringify(data.getGame.gameField.letters)) as Letter[]
+    );
+  }
   const game = data.getGame;
   let playernames: string[] = [];
   data.getGame.players?.map((i) => playernames.push(i.username));
@@ -81,9 +87,11 @@ const Game = ({}) => {
     console.log(some);
     if (some) {
       await makeTurn({
-        gameId: 1,
-        confirmed: false,
-        word: letterState as CellInput[],
+        variables: {
+          gameId: 1,
+          confirmed: false,
+          word: letterState as CellInput[],
+        },
       });
       return;
     }
@@ -116,11 +124,12 @@ const Game = ({}) => {
   };
 
   const resetInsertion = () => {
-    letters = data.getGame!.gameField.letters;    
+    updateLetters(data.getGame!.gameField.letters);
     togglePhase({
       cell: null,
       phase: "insertion",
-    });    
+    });
+    refetch();
   };
   const handleField = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -138,10 +147,10 @@ const Game = ({}) => {
 
     if (phaseState.phase === "insertion") {
       // Adding new cell
-      if (chosenCell.filled){
+      if (chosenCell.filled) {
         return;
       }
-      if (phaseState.cell === null ) {
+      if (phaseState.cell === null) {
         togglePhase({
           cell: chosenCell,
           phase: "insertion",
@@ -274,4 +283,4 @@ const Game = ({}) => {
     </Layout>
   );
 };
-export default withUrqlClient(createUrqlClient)(Game);
+export default withApollo({ ssr: false })(Game);

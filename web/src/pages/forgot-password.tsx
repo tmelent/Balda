@@ -1,16 +1,15 @@
 import { Form, Formik } from "formik";
-import { withUrqlClient } from "next-urql";
 import React, { useState } from "react";
-import { InputField } from "../components/forms/InputField";
-import { Wrapper } from "../components/basic/Wrapper";
-import { useForgotPasswordMutation } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
-import styles from "../components/styles/login.module.scss";
+import { withApollo } from "src/utils/withApollo";
 import { Button } from "../components/basic/Button";
+import { Wrapper } from "../components/basic/Wrapper";
+import { InputField } from "../components/forms/InputField";
 import { NavBar } from "../components/NavBar";
+import styles from "../components/styles/login.module.scss";
+import { useForgotPasswordMutation } from "../generated/graphql";
 export const ForgotPassword: React.FC<{}> = ({}) => {
   const [complete, setComplete] = useState(false);
-  const [, forgotPassword] = useForgotPasswordMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
   return (
     <>
       <NavBar />
@@ -18,7 +17,7 @@ export const ForgotPassword: React.FC<{}> = ({}) => {
         <Formik
           initialValues={{ email: "" }}
           onSubmit={async (values) => {
-            await forgotPassword(values);
+            await forgotPassword({variables: values});
             setComplete(true);
           }}
         >
@@ -50,4 +49,4 @@ export const ForgotPassword: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(ForgotPassword);
+export default withApollo({ssr: false})(ForgotPassword);

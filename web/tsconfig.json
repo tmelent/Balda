@@ -40,5 +40,5 @@
   "include": [
     "./**/*.tsx",
     "./**/*.ts"
-  ]
+, "src/utils/withApolloClient.js"  ]
 }

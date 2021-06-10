@@ -1,22 +1,21 @@
 import { Form, Formik } from "formik";
-import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { withApollo } from "src/utils/withApollo";
 import { Button } from "../components/basic/Button";
 import { Link } from "../components/basic/Link";
+import { Text } from "../components/basic/Text";
+import { Wrapper } from "../components/basic/Wrapper";
 import { InputField } from "../components/forms/InputField";
+import { NavBar } from "../components/NavBar";
 import styles from "../components/styles/login.module.scss";
 import utilStyles from "../components/styles/utility.module.scss";
 import { useLoginMutation } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import { toErrorMap } from "../utils/toErrorMap";
-import { Text } from "../components/basic/Text";
-import { NavBar } from "../components/NavBar";
-import { Wrapper } from "../components/basic/Wrapper";
 export const Login: React.FC<{}> = ({}) => {
   const router = useRouter();
-  const [, login] = useLoginMutation();
+  const [login] = useLoginMutation();
   return (
     <>
       <NavBar />
@@ -24,7 +23,7 @@ export const Login: React.FC<{}> = ({}) => {
         <Formik
           initialValues={{ usernameOrEmail: "", password: "" }}
           onSubmit={async (values, { setErrors }) => {
-            const response = await login(values);
+            const response = await login({ variables: values });
             if (response.data?.login.errors) {
               setErrors(toErrorMap(response.data.login.errors));
             } else if (response.data?.login.user) {
@@ -69,4 +68,4 @@ export const Login: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Login);
+export default withApollo({ ssr: false })(Login);

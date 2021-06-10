@@ -1,6 +1,4 @@
-import { withUrqlClient } from "next-urql";
 import * as React from "react";
-import { createUrqlClient } from "src/utils/createUrqlClient";
 import { Flex } from "../basic/Flex";
 import styles from "../styles/keyboard.module.scss";
 import utilStyles from "../styles/utility.module.scss";
@@ -102,4 +100,3 @@ export const Keyboard: React.FC<KeyboardProps> = ({
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Keyboard as any);

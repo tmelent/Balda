@@ -1,7 +1,7 @@
 import { Form, Formik } from "formik";
-import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import React from "react";
+import { withApollo } from "src/utils/withApollo";
 import { Button } from "../components/basic/Button";
 import { Wrapper } from "../components/basic/Wrapper";
 import { InputField } from "../components/forms/InputField";
@@ -9,11 +9,10 @@ import { NavBar } from "../components/NavBar";
 import styles from "../components/styles/login.module.scss";
 import utilStyles from "../components/styles/utility.module.scss";
 import { useRegisterMutation } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import { toErrorMap } from "../utils/toErrorMap";
 export const Register: React.FC<{}> = ({}) => {
   const router = useRouter();
-  const [, register] = useRegisterMutation();
+  const [register] = useRegisterMutation();
   return (
     <>
       <NavBar />
@@ -21,7 +20,7 @@ export const Register: React.FC<{}> = ({}) => {
         <Formik
           initialValues={{ email: "", username: "", password: "" }}
           onSubmit={async (values, { setErrors }) => {
-            const response = await register({ options: values });
+            const response = await register({ variables: { options: values } });
             if (response.data?.register.errors) {
               setErrors(toErrorMap(response.data.register.errors));
             } else if (response.data?.register.user) {
@@ -40,7 +39,7 @@ export const Register: React.FC<{}> = ({}) => {
                 placeholder="логин"
                 label="логин или e-mail"
               />
-               <div className={utilStyles.mt4} />
+              <div className={utilStyles.mt4} />
               <InputField
                 name="email"
                 placeholder="e-mail"
@@ -54,7 +53,7 @@ export const Register: React.FC<{}> = ({}) => {
                 label="пароль"
                 type="password"
               />
-             
+
               <div className={styles.submitSection}>
                 <Button isLoading={isSubmitting} className={styles.submitBtn}>
                   Отправить
@@ -68,4 +67,4 @@ export const Register: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Register);
+export default withApollo({ ssr: false })(Register);

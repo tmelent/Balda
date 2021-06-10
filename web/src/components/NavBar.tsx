@@ -1,4 +1,3 @@
-
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
@@ -7,17 +6,15 @@ import { isServer } from "../utils/isServer";
 import { Flex } from "./basic/Flex";
 import styles from "./styles/navbar.module.scss";
 import utilStyles from "./styles/utility.module.scss";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import {Link} from "./basic/Link";
 import {Text} from "./basic/Text";
 
 export const NavBar: React.FC = () => {
-  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-  const [{ data, fetching }] = useMeQuery({ pause: isServer() });
+  const [logout, {loading: logoutFetching }] = useLogoutMutation();
+  const { data, loading } = useMeQuery({ skip: isServer() });
   const router = useRouter();
   let body = null;
-  if (isServer() || fetching) {
+  if (isServer() || loading) {
   } else if (!data?.me) {
     body = (
       <div className={`${styles.navbarText} ${utilStyles.mlAuto} ${utilStyles.gap4}`}>
@@ -65,4 +62,3 @@ export const NavBar: React.FC = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient,{ssr:true})(NavBar);

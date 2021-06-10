@@ -1,8 +1,6 @@
-import { withUrqlClient } from "next-urql";
 import React from "react";
-import { createUrqlClient } from "../utils/createUrqlClient";
+import { withApollo } from "src/utils/withApollo";
 import { Layout } from "../components/basic/Layout";
-import { Keyboard } from "src/components/keyboard/Keyboard";
 
 // const io = require("socket.io-client");
 // const socket = io("https://api.example.com", {
@@ -12,15 +10,13 @@ import { Keyboard } from "src/components/keyboard/Keyboard";
 //   }
 // });
 
-export function Home() {
-  
+export function Index() {  
   return (
     <div className="app">
-      <Layout>
-      <Keyboard turn={true}/>
+      <Layout>      
       </Layout>
     </div>
   );
 }
 
-export default withUrqlClient(createUrqlClient, {ssr: true})(Home);
+export default withApollo({ssr: true})(Index);
