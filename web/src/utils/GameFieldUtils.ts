@@ -6,7 +6,15 @@ export type PhaseState = {
   phase: string;
   cell: CellInput | null;
 };
+/**
+ * Type for socket.io instance
+*/
 export type SocketState = Socket<DefaultEventsMap, DefaultEventsMap> | null;
+/**
+ * Converts Letter object to CellInput GQL type
+ * @param letter Letter object
+ * @returns CellInput object
+ */
 export const convertLetterToCellInput = (letter: Letter): CellInput => {
   const { boxNumber, char, filled, isNew } = letter;
   let cell: CellInput = { boxNumber, char, filled, isNew };
@@ -45,10 +53,17 @@ export const insertionPhaseCheck = (
   }
 };
 
+/**
+ * Checking -> Adding cell to wordState  
+ * @param e Event
+ * @param chosenCell Cell 
+ * @param updateWordState Function, that updates word state 
+ * @param wordState Word state  
+ */
 export const selectionPhaseCheck = (
   e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   chosenCell: CellInput,
-  updateState: Function,
+  updateWordState: Function,
   wordState: CellInput[]
 ) => {
   // We can put only elements with char in letterState
@@ -62,7 +77,7 @@ export const selectionPhaseCheck = (
     : styles.cellActive;
 
   if (wordState.length === 0) {
-    updateState([...wordState, chosenCell]);
+    updateWordState([...wordState, chosenCell]);
     e.currentTarget.classList.add(cellStyling);
     return;
   }
@@ -78,7 +93,7 @@ export const selectionPhaseCheck = (
     ) {      
       // Removing last element from array
       wordState.pop();
-      updateState([...wordState]);      
+      updateWordState([...wordState]);      
       e.currentTarget.classList.remove(cellStyling);
       return;
     }
@@ -96,7 +111,7 @@ export const selectionPhaseCheck = (
     ) !== -1
   ) {    
     // Value can be inserted
-    updateState([...wordState, chosenCell]);
+    updateWordState([...wordState, chosenCell]);
     e.currentTarget.classList.add(cellStyling);
   }
 };

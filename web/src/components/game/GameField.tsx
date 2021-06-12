@@ -3,14 +3,6 @@ import { Letter } from "../../generated/graphql";
 import { convertLetterToCellInput } from "../../utils/GameFieldUtils";
 import styles from "../styles/gameField.module.scss";
 import { Text } from "../basic/Text";
-// structure:
-// Layout:
-//      - GameFieldGrid
-//      - Keyboard
-//      - PlayerTableWrap -> PlayerTable x2
-//
-// Functions:
-//
 
 interface GameFieldProps {
   letters: Letter[];
