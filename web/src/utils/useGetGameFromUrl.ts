@@ -9,6 +9,8 @@ export const useGetGameFromUrl = () => {
     skip: intId === -1,
     variables: {
       gameId: intId,
-    }    
+      
+    },
+    notifyOnNetworkStatusChange: true   
   });
 };

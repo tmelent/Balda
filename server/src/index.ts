@@ -107,15 +107,17 @@ const main = async () => {
 
   const io = new Server(httpServer, options);
 
-  io.on("connection", (socket: Socket) => {
-    console.log(`New connection: ${socket.id}`);
-    socket.on("connectionToRoom", (gameId) => {
-      io.socketsJoin(`${gameId}`);
-      console.log(`player ${socket.id} joined room: ${gameId}`)
-      io.to(`${gameId}`).emit("playerJoined", socket.id, gameId);
+  io.on("connection", (socket: Socket, ) => {
+    socket.emit("connection");
+    socket.on("connectionToRoom", room => {
+      console.log(`${socket.id} tries to connect to room ${room}`);
+      socket.join(room);
+      io.sockets.in(room).emit("playerJoined", socket.id);
+      // io.to(room).emit("playerJoined", socket.id);
+      // socket.to(room).emit("playerJoined", socket.id);
     })
     socket.on("fieldUpdated", (room) => {
-      io.to(`${room}`).emit("updateGame");
+      io.sockets.in(room).emit("updateGame");
     })
     socket.on("turnConfirmed", (data) => {
       const { word, gameId } = data;
