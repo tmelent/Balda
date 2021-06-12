@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
+import { GameField } from "src/components/game/GameField";
 import { PlayerTable } from "src/components/game/PlayerTable";
+import {
+  insertionPhaseCheck,
+  PhaseState,
+  selectionPhaseCheck,
+  SocketState,
+} from "src/utils/GameFieldUtils";
 import { isServer } from "src/utils/isServer";
 import { useGetGameFromUrl } from "src/utils/useGetGameFromUrl";
 import { withApollo } from "src/utils/withApollo";
@@ -15,40 +22,40 @@ import {
   useMeQuery,
 } from "../../generated/graphql";
 
+import _ from "lodash";
+import { NetworkStatus } from "@apollo/client";
+
 const Game = ({}) => {
   // Initial states and typings
   let lettersInitial: Letter[] = [];
-  type PhaseState = {
-    phase: string;
-    cell: CellInput | null;
-  };
-  let letterInitialState: CellInput[] = [];
+  let initialSocketState: SocketState = null;
+  let wordInitialState: CellInput[] = [];
   let phaseInitialState: PhaseState = {
     cell: null,
     phase: "insertion",
   };
 
   // Hooks
+  const { data, loading, refetch, networkStatus } = useGetGameFromUrl();
   const meData = useMeQuery({ skip: isServer() });
   const [makeTurn] = useMakeTurnMutation();
-  const { data, loading, refetch } = useGetGameFromUrl();
   const [letters, updateLetters] = useState(lettersInitial);
-  const [letterState, updateState] = useState(letterInitialState);
+  const [wordState, updateWordState] = useState(wordInitialState);
+  const [roomConnection, connectToRoom] = useState(false);
+  const [socket, setSocket] = useState<SocketState>(initialSocketState);
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
    * "selection" phase - can't insert values, can only select filled cells (and new one too)
    */
   const [phaseState, togglePhase] = useState(phaseInitialState);
-
   useEffect(() => {
-    const socket = socketIOClient("localhost:4000");
-    socket.on("playerConnected", (data) => {
-      console.log(`player ${data} connected`);
-    });
-    socket.on("confirmationRequired", (data) => {
-      alert(`allow ${data.word}?`);
-    });
-  });
+    setSocket(socketIOClient("localhost:4000"));
+    return () => {
+      if (socket) {
+        socket.off();
+      }
+    };
+  }, []);
 
   // Fetching
   if (loading) {
@@ -68,45 +75,77 @@ const Game = ({}) => {
     );
   }
 
-  if (letters.length === 0) {
-    console.log(`reparsing:`);
-    console.log(letters);
-    updateLetters(
-      JSON.parse(JSON.stringify(data.getGame.gameField.letters)) as Letter[]
-    );
+  // Deep cloning because apollo hook response is R/O
+  if (letters.length === 0 || networkStatus === NetworkStatus.refetch) {
+    updateLetters(_.cloneDeep(data.getGame.gameField.letters));
   }
+
+  // Connecting to socket.io room
+  if (!roomConnection && socket) {
+    console.log(`connecting to room ${data.getGame!.id}`);
+    socket.emit("connectionToRoom", data.getGame!.id);
+    connectToRoom(true);
+  }
+
+  // Listening to socket
+  if (socket) {
+    // When a new player joins the game
+    socket.on("playerJoined", (socketId) => {
+      console.log(`player: socketId: ${socketId}`);
+    });
+    // When turn is made, game updates
+    socket.on("updateGame", () => {
+      togglePhase({
+        cell: null,
+        phase: "insertion",
+      });
+
+      refetch().then((res) =>
+        updateLetters(
+          _.cloneDeep(res.data.getGame?.gameField.letters) as Letter[]
+        )
+      );
+    });
+  }
+
+  // extracting game 
   const game = data.getGame;
+  // extracting playernames
   let playernames: string[] = [];
   data.getGame.players?.map((i) => playernames.push(i.username));
+  
+  const isMyTurn =
+    game.currentTurn ===
+    game.players?.findIndex((i) => i.id === meData.data!.me!.id);
 
+  /** 
+   * Making a turn with pre-checking
+   * */ 
   const sendTurn = async () => {
-    console.log(`in send turn method`);
-    console.log(`trying to make turn with word:`);
-    letterState.map((i) => console.log(i));
-    const some = letterState.some((i) => i.isNew === true);
-    console.log(some);
+    const some = wordState.some((i) => i.isNew === true);
     if (some) {
-      await makeTurn({
-        variables: {
-          gameId: 1,
-          confirmed: false,
-          word: letterState as CellInput[],
-        },
-      });
+      try {
+        await makeTurn({
+          variables: {
+            gameId: game.id,
+            confirmed: false,
+            word: wordState as CellInput[],
+          },
+        });
+        refetch();
+        updateWordState([]);
+        socket?.emit("fieldUpdated", data.getGame!.id);
+      } catch (e) {
+        console.error(e.message);
+      }
       return;
     }
   };
 
-  const convertLetterToCellInput = (letter: Letter): CellInput => {
-    const { boxNumber, char, filled, isNew } = letter;
-    let cell: CellInput = { boxNumber, char, filled, isNew };
-    return cell;
-  };
-
-  const isMyTurn =
-    game.currentTurn ===
-    data.getGame!.players?.findIndex((i) => i.id === meData.data!.me!.id);
-
+  /**
+   * Handling new cell insertion on insertion phase
+   * @param char selected character on keyboard
+   */
   const handleInsertion = (char: string) => {
     if (phaseState.cell !== null && phaseState.phase === "insertion") {
       togglePhase({
@@ -123,143 +162,45 @@ const Game = ({}) => {
     }
   };
 
+  /**
+   * Resets game field insertions and selections (refetches)
+   */
   const resetInsertion = () => {
-    updateLetters(data.getGame!.gameField.letters);
+    updateLetters(_.cloneDeep(data.getGame!.gameField.letters));
     togglePhase({
       cell: null,
       phase: "insertion",
     });
+    updateWordState([]);
     refetch();
   };
+
+  /**
+   * Handles selection or insertion on field
+   * @param e event
+   * @param chosenCell  
+   */
   const handleField = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     chosenCell: CellInput
   ) => {
-    console.log(chosenCell);
     // Player can only do something if it's his turn.
     if (!isMyTurn) {
       return;
     }
 
-    // --- Phase 1 ---
     // Insertion phase
-    // ---------------
-
     if (phaseState.phase === "insertion") {
-      // Adding new cell
-      if (chosenCell.filled) {
-        return;
-      }
-      if (phaseState.cell === null) {
-        togglePhase({
-          cell: chosenCell,
-          phase: "insertion",
-        });
-        // Styling
-        e.currentTarget.classList.add(styles.previewCellActive);
-        return;
-      }
-
-      // Removing cell if it matches a cell in phaseState
-      if (phaseState.cell.boxNumber === chosenCell.boxNumber) {
-        togglePhase({
-          cell: null,
-          phase: "insertion",
-        });
-        // Styling
-        e.currentTarget.classList.remove(styles.previewCellActive);
-        return;
-      }
-      return;
+      return insertionPhaseCheck(e, chosenCell, togglePhase, phaseState);
     }
 
-    // --- Phase 2 ---
     // Selection phase
-    // ---------------
-
-    // We can put only elements with char in letterState
-    if (!chosenCell.char) {
-      return;
-    }
-
-    // We can safely put cell in letterState if it has no elements in it yet.
-    const cellStyling = chosenCell.isNew
-      ? styles.previewCellChosen
-      : styles.cellActive;
-    console.log(`cell is ${chosenCell.isNew}`);
-    console.log(cellStyling);
-    if (letterState.length === 0) {
-      console.log(`length: 0`);
-      updateState([...letterState, chosenCell]);
-      e.currentTarget.classList.add(cellStyling);
-      return;
-    }
-
-    // Allowed values of difference between previous element index and new element index
-
-    // Trying to find element in state to remove
-    if (letterState.find((i) => i.boxNumber === chosenCell.boxNumber)) {
-      // Element can only be removed if it is last element in array
-      if (
-        letterState.findIndex((i) => i.boxNumber === chosenCell.boxNumber) ===
-        letterState.length - 1
-      ) {
-        console.log(`removing`);
-        // Removing last element from array
-        letterState.pop();
-        updateState([...letterState]);
-        console.log(e.currentTarget.classList);
-        e.currentTarget.classList.remove(cellStyling);
-        return;
-      }
-      return;
-    }
-    // Checking if player can use this cell via comparing indexes
-    // |prevElementIdx - newElementIdx| === 5 || 1
-    let allowedDiff = [5, 1];
-    if (
-      allowedDiff.indexOf(
-        Math.abs(
-          chosenCell.boxNumber - letterState[letterState.length - 1].boxNumber
-        )
-      ) !== -1
-    ) {
-      console.log(`inserting`);
-      // Value can be inserted
-      updateState([...letterState, chosenCell]);
-      e.currentTarget.classList.add(cellStyling);
-    }
+    return selectionPhaseCheck(e, chosenCell, updateWordState, wordState);
   };
-
-  // Splitting letters in columns and rows
-  var rows = [];
-  for (var i = 0; i < letters.length; i += 5) {
-    rows.push(letters.slice(i, 5 + i));
-  }
 
   return (
     <Layout>
-      <div className={styles.gameFieldGrid}>
-        {rows.map((row, i) => {
-          return (
-            <div className={styles.gameRow} key={`cells-row-${i}`}>
-              {row.map((col) => (
-                <div
-                  className={`${styles.gameCell}`}
-                  onClick={(e) => handleField(e, convertLetterToCellInput(col))}
-                  key={`cell-${col.boxNumber}`}
-                >
-                  <Text className={styles.cellText}>
-                    {/* Insert new char here (but not in database) */}
-                    {col.char === "" ? null : col.char.toUpperCase()}
-                  </Text>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-
+      <GameField letters={letters} handleField={handleField} />
       <Keyboard
         turn={isMyTurn}
         handleFunction={handleInsertion}
