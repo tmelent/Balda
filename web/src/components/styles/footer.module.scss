@@ -1,0 +1,23 @@
+.footerWrap {
+  display: flex;
+  width: 100%;
+  position: relative;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 10rem;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
+  color: white;
+  gap: 2rem;
+  font-family: "Roboto", "sans-serif";
+  font-size: 1.5rem;
+  :nth-child(2) {
+    font-size: 3.5rem;
+  }
+  a {
+    text-decoration: none;
+    color: white;
+  }
+}

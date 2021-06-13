@@ -1,26 +1,29 @@
 .key {
-  font-size: 3.5rem;
+  font-size: 4rem;
   width: 6rem;
   height: 6rem;
-
-  margin: 0.5rem;
+  margin: 0.25rem;
+  margin-bottom: .5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(207, 207, 207);
+  background-color: rgb(236, 226, 226);
+  border: .15rem solid rgba(255,255,255,0.3);
   cursor: pointer;
-  border-radius: 1.2rem;
+  font-weight: 500; 
+  border-radius: 1.5rem;
   -webkit-box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
   -moz-box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
   box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
-  transition: 0.3s ease all;
-
+  transition: 0.2s ease all;
+  color: rgb(0, 0, 0);
   &:hover {
-    scale: 115%;
+    background-color: rgba(73, 73, 73, 0.877);
+    color: white;
   }
+
   &:active {
-    background-color: rgb(156, 156, 209);
-    scale: 120%;
+    scale: 112%;
   }
 }
 
@@ -29,17 +32,24 @@
   gap: 2rem;
 }
 
-.keyboardWrap{
-  margin-top: 4rem;
+.keyboardWrap {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-top: 5rem;
+  background: rgba(41, 40, 40, 0.568);
+  border-radius: 2.5rem;
 }
 @mixin btn-darken($bg) {
-  transition: 0.3s ease-in-out all;
+  transition: 0.2s ease all;
   &:hover {
     background-color: darken($bg, 12%);
   }
 }
 
 .deleteBtn {
+  margin-right: 1.25rem;
   cursor: pointer;
   font-size: 2rem;
   padding: 1rem;
@@ -50,10 +60,12 @@
   justify-content: center;
   border-radius: 1.2rem;
   color: white;
-  @include btn-darken(rgb(204, 42, 42));
+  border: 0.25rem solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(182, 56, 17, 0.514);
+  @include btn-darken(rgba(122, 37, 26, 0.781));
 }
 .submitBtn {
-  @include btn-darken(#4ca1af);
+  @include btn-darken(#1a2f63c5);
   margin-left: auto;
   cursor: pointer;
   font-size: 2rem;
@@ -65,8 +77,10 @@
   justify-content: center;
   border-radius: 1.2rem;
   color: white;
-  background-color: #4ca1af;
+  border: 0.25rem solid rgba(255, 255, 255, 0.3);
+  background-color: #132c7086;
 }
+
 .keyboardRow {
   width: 100%;
   display: flex;

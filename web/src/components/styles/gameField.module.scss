@@ -1,41 +1,9 @@
-.gameRow {
-  display: flex;
-  margin-left: auto;
-  margin-right: auto;
-  align-items: center;
-  justify-content: center;
-  width: 35rem;
-  &:nth-of-type(5) {
-    border-bottom: 4px solid black;
-  }
-}
+$borderColor: #fff;
+$hoverColor: rgb(251, 251, 223);
+$hoverFontColor: rgb(151, 151, 151);
 
-.gameCell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 7rem;
-  width: 7rem;
-  font-size: 5rem;
-  font-family: "PT Sans Caption", "sans-serif";
-  font-weight: 100;
-  border-right: 4px solid black;
-  border-top: 4px solid black;
-  &:first-child {
-    border-left: 4px solid black;
-  }
-  &:last-child {
-    border-right: 4px solid black;
-  }
-  &:hover {
-    background-color: rgb(68, 73, 69);
-    color: white;
-    transition: all 0.3s ease;
-  }
-  cursor: pointer;
-}
 .cellActive {
-  background-color: rgb(95, 120, 189);
+  background-color: rgb(207, 96, 152) !important;
   color: white;
 }
 
@@ -56,13 +24,13 @@
 }
 
 .previewCellActive {
-  background: linear-gradient(60deg, #4ca1af, #c4e0e5);
+  background: linear-gradient(60deg, #ee9714, rgb(104, 28, 175));
   color: white;
   @include backgroundGradAnimation;
 }
 
 .previewCellChosen {
-  background: linear-gradient(60deg, #ff5f6d, #ffc371, #ff5f6d, #ffc371);
+  background: linear-gradient(60deg, #ff5f6d, #ffc371);
   color: white;
   @include backgroundGradAnimation;
 }
@@ -74,40 +42,45 @@
   user-select: none;
 }
 
-.gameFieldGrid {
-  margin-top: calc(25% - 8rem);
-}
-
 .playerTable {
-  width: 30rem;
-  height: 35rem;
   color: white;
-  > table {
-    table-layout: fixed !important;
+  margin-top: 2.5rem;
+  height: 45rem !important;
+  margin-bottom: 5rem;
+  width: 100%;
+  .table {
+    word-break: break-word;
+    height: 2rem !important;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
   }
-  background: rgb(68, 73, 69);
+  background: rgb(39, 41, 40);
 
   thead {
     font-size: 2.2rem;
-    .turn {
-      background: rgb(214, 107, 65) !important;
-    }
     font-family: "PT Sans Caption";
+    
+    .turn {
+      background: rgb(233, 115, 47) !important;
+    }
 
     tr {
-      background: rgb(97, 97, 97);
+      background: rgb(80, 80, 80);
       td {
         padding: 2rem;
       }
     }
   }
-  border: 1rem solid rgb(97, 97, 97);
+  border: 1rem solid rgb(27, 27, 27);
 
   tbody {
+    display: grid;
+   
+    height:40rem;
+    justify-content: center; 
+    overflow-y: scroll;
     text-align: center;
     font-size: 25px;
   }
@@ -121,10 +94,10 @@
 }
 
 .playerTableWrap {
-  margin-left: auto;
-  margin-right: auto;
-  align-items: center;
-  justify-content: center;
-  margin-top: 3rem;
+  margin-top: 5rem;
   display: flex;
+}
+
+.playerTable {
+overflow: hidden;
 }

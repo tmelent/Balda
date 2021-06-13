@@ -1,24 +1,19 @@
 .navbarText {
   font-size: 2.2rem;
-  color: white;
-  
+  color: white;  
 }
 
 .navbar {
   align-items: center;
   justify-items: center;
   z-index: 1;
-  position: sticky;
-  top: 0;
   padding-top: 1rem;
   padding-bottom: 1rem;
-  background: rgb(56, 56, 56);
+  background: rgb(41, 41, 41, 0.5);
   height: 6rem;
-
   a {
     text-decoration: none;
-    color: white;
-  
+    color: white;  
   }
 }
 
@@ -28,8 +23,7 @@
   font-size: 5rem !important;
   &:hover {
     cursor: pointer;
-  }
-  
+  }  
 }
 
 .navWrap {

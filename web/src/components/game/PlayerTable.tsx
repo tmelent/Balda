@@ -12,25 +12,27 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
   username,
   wordList,
   currentTurn,
-  points
+  points,
 }) => {
   return (
     <div className={styles.playerTable}>
-      <table>
+      <table className={styles.table}>
         <thead>
           <tr className={currentTurn ? styles.turn : ""}>
-           <td className={styles.username}>{username} {points}</td>
+            <td className={styles.username}>
+              {username} {points}
+            </td>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>
+            <td className={styles.tableList}>
               {wordList
                 ? wordList.map((i) => {
                     return (
                       <Text
                         key={`p2-word-${username}-${i}`}
-                        className={styles.word}
+                        className={`styles.word`}
                       >
                         {i}
                       </Text>

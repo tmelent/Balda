@@ -13,8 +13,8 @@ import { Layout } from "../components/basic/Layout";
 export function Index() {  
   return (
     <div className="app">
-      <Layout>      
-      </Layout>
+      <Layout/>      
+      
     </div>
   );
 }
