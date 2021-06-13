@@ -63,11 +63,11 @@ $hoverFontColor: rgb(151, 151, 151);
     font-family: "PT Sans Caption";
     
     .turn {
-      background: rgb(233, 115, 47) !important;
+      background: linear-gradient(60deg, #ff5f6ce7, #ffbc5ece) !important;
     }
 
     tr {
-      background: rgb(80, 80, 80);
+      background: linear-gradient(60deg, #8c4fdbce, #476aaae7);
       td {
         padding: 2rem;
       }
