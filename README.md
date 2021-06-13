@@ -27,13 +27,15 @@
 "Balda" is a simple, but interesting game, which is played (usually) on 5x5 field. Each cell of the field can contain one character. 
 Game begins with 5-letter word in middle of the field: 
 
-![game created](https://github.com/tmelent/balda/blob/master/github_screenshots/genfield.png?raw=true)
+![game created](https://github.com/tmelent/balda/blob/master/github_screenshots/genfield.PNG?raw=true)
 
 Every turn player has to add a letter in an empty field and connect existing letters with this one to make a word.
 
+![game created](https://github.com/tmelent/balda/blob/master/github_screenshots/turn.PNG?raw=true)
 
-Here, for example, I added 'R' in empty cell and connected letters [p, e, e, r] in special order to make word 'peer'
-Peer has 4 letters, contains new letter in it, so it's four points to me.
+If the word exists, the player gets points equal to the length of the entered word.
+
+![game created](https://github.com/tmelent/balda/blob/master/github_screenshots/scoretable_footer.PNG?raw=true)
 
 Game lasts until every field is filled. 
 
