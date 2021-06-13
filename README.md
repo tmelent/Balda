@@ -7,16 +7,17 @@
 ##### - TypeORM
 ##### - PostgreSQL, Redis
 ##### - GraphQL, TypeGraphQL
-##### - Socket.IO (front too)
+##### - Socket.IO
 
 ## Client-side:
 ##### - TypeScript
 ##### - Next.js
 ##### - React.js
 ##### - GraphQL Code Generator
-##### - Sass
-##### - URQL
+##### - Sass (SCSS)
+##### - URQL -> Apollo Client
 ##### - Formik
+##### - React-icons
 
 ## Testing:
 ##### - Jest (ts-jest)
@@ -41,3 +42,4 @@ Game lasts until every field is filled.
 
 Connections can be only vertical or horizontal.
 
+If you want to see more screenshots, go to the github_screenshots folder in root folder.
