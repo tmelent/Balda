@@ -1,21 +1,22 @@
 # Balda
 
-## Server-side:
-##### - TypeScript
+## Back-end
 ##### - Node.js
+##### - TypeScript
 ##### - Express | Apollo Server Express 
 ##### - TypeORM
-##### - PostgreSQL, Redis
-##### - GraphQL, TypeGraphQL
+##### - PostgreSQL
+##### - Redis
+##### - GraphQL w/TypeGraphQL
 ##### - Socket.IO
 
-## Client-side:
+## Front-end:
 ##### - TypeScript
 ##### - Next.js
 ##### - React.js
 ##### - GraphQL Code Generator
 ##### - Sass (SCSS)
-##### - URQL -> Apollo Client
+##### - ~~URQL~~ Apollo Client
 ##### - Formik
 ##### - React-icons
 
@@ -32,11 +33,11 @@ Game begins with 5-letter word in middle of the field:
 
 Every turn player has to add a letter in an empty field and connect existing letters with this one to make a word.
 
-![game created](https://github.com/tmelent/balda/blob/master/github_screenshots/turn.PNG?raw=true)
+![turn](https://github.com/tmelent/balda/blob/master/github_screenshots/turn.PNG?raw=true)
 
 If the word exists, the player gets points equal to the length of the entered word.
 
-![game created](https://github.com/tmelent/balda/blob/master/github_screenshots/scoretable_footer.PNG?raw=true)
+![scoretable_footer](https://github.com/tmelent/balda/blob/master/github_screenshots/scoretable_footer.PNG?raw=true)
 
 Game lasts until every field is filled. 
 
