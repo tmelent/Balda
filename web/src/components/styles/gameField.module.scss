@@ -41,7 +41,43 @@ $hoverFontColor: rgb(151, 151, 151);
   -ms-user-select: none;
   user-select: none;
 }
-
+.tokenWrap {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(27, 27, 27, 0.5);
+  border-radius: 2.5rem;
+  margin-top: 2rem;
+  padding-bottom: 2rem;
+  margin-left: auto;
+  justify-content: center;
+  margin-right: auto;
+  width: 100%;
+}
+.invitationText {
+  align-self: center;
+  font-family: "Nunito", sans-serif;
+  color: white;
+  font-size: 1.7rem;
+}
+.tokenUrlInput {
+  align-self: center;
+  border: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.35rem;
+  &::selection {
+    background: rgba(8, 8, 8, 0.733);
+  color: white;
+  }
+  &:focus-visible {
+    border: none;
+    outline: none;
+  }
+  border-radius: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  width: 90%;
+  padding-left: 2rem;
+}
 .playerTable {
   color: white;
   margin-top: 2.5rem;
@@ -50,18 +86,19 @@ $hoverFontColor: rgb(151, 151, 151);
   width: 100%;
   .table {
     word-break: break-word;
-    height: 2rem !important;
+    height: 4rem !important;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
   }
   background: rgb(39, 41, 40);
-
+  margin-left: auto;
+  margin-right: auto;
   thead {
     font-size: 2.2rem;
     font-family: "PT Sans Caption";
-    
+
     .turn {
       background: linear-gradient(60deg, #ff5f6ce7, #ffbc5ece) !important;
     }
@@ -76,9 +113,9 @@ $hoverFontColor: rgb(151, 151, 151);
   border: 1rem solid rgb(27, 27, 27);
 
   tbody {
-    display: grid;   
-    height:40rem;
-    justify-content: center; 
+    display: grid;
+    height: 40rem;
+    justify-content: center;
     overflow-y: scroll;
     text-align: center;
     font-size: 25px;
@@ -89,14 +126,17 @@ $hoverFontColor: rgb(151, 151, 151);
 }
 
 .turnIndication {
-  font-size: 2rem;
+  font-size: 4rem;
 }
 
 .playerTableWrap {
   margin-top: 5rem;
   display: flex;
+  width: 100%;
+
+  margin-right: auto;
 }
 
 .playerTable {
-overflow: hidden;
+  overflow: hidden;
 }

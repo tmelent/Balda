@@ -66,6 +66,7 @@ export class GameResolver {
     return await GameField.findOne({ where: { game } });
   }
 
+
   /**
    * Connects user to existing game as player #2.
    * @param gameId Id of current game
@@ -132,25 +133,6 @@ export class GameResolver {
       console.error(error);
     }
     return { game };
-    // // Attempt to find game and use
-    // const game = await Game.findOne({ id: gameId }, { relations: ["players"] });
-    // const user = await User.findOne(
-    //   { id: req.session.userId },
-    //   { relations: ["games"] }
-    // );
-    // if (game && user) {
-    //   console.log(game);
-    //   game.players.map((i) => console.log(i.id));
-    //   if (!game.players.includes(user)) {
-    //     // Add new game to current user's game list
-    //     user.games = [...user.games, game];
-    //     await getRepository(User).save(user);
-    //     console.log(`User ${user.username} connected to game #${gameId}`);
-    //     return game;
-    //   }
-    //   return new Error("You are already in game");
-    // }
-    // return game;
   }
 
   @Mutation(() => String)

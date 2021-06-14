@@ -18,6 +18,7 @@ import styles from "../../components/styles/gameField.module.scss";
 import {
   CellInput,
   Letter,
+  useCreateInvitationMutation,
   useMakeTurnMutation,
   useMeQuery,
 } from "../../generated/graphql";
@@ -36,6 +37,7 @@ const Game = ({}) => {
   };
 
   // Hooks
+
   const { data, loading, refetch, networkStatus } = useGetGameFromUrl();
   const meData = useMeQuery({ skip: isServer() });
   const [makeTurn] = useMakeTurnMutation();
@@ -43,11 +45,16 @@ const Game = ({}) => {
   const [wordState, updateWordState] = useState(wordInitialState);
   const [roomConnection, connectToRoom] = useState(false);
   const [socket, setSocket] = useState<SocketState>(initialSocketState);
+
+  const [createInvitation] = useCreateInvitationMutation();
+  const [tokenUrl, updateUrl] = useState("");
+
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
    * "selection" phase - can't insert values, can only select filled cells (and new one too)
    */
   const [phaseState, togglePhase] = useState(phaseInitialState);
+
   useEffect(() => {
     setSocket(socketIOClient("localhost:4000"));
     return () => {
@@ -56,7 +63,6 @@ const Game = ({}) => {
       }
     };
   }, []);
-
   let playernames: string[] = [];
   let getGame = data?.getGame;
   getGame?.players?.map((i) => playernames.push(i.username));
@@ -65,6 +71,7 @@ const Game = ({}) => {
     getGame?.players?.findIndex((i) => i.id === meData.data!.me!.id);
 
   const turnUsername = playernames[getGame?.currentTurn!];
+
   // Fetching
   if (loading || !meData || !data) {
     let _letters: Letter[] = new Array(25);
@@ -141,6 +148,17 @@ const Game = ({}) => {
       <Layout>
         <Text>Невозможно загрузить игру.</Text>
       </Layout>
+    );
+  }
+  if (tokenUrl === "" && data) {
+    createInvitation({
+      variables: {
+        gameId: data.getGame.id,
+      },
+    }).then((res) =>
+      updateUrl(
+        `localhost:3000/game/join-game/${res.data?.createInvitation as string}`
+      )
     );
   }
 
@@ -262,6 +280,24 @@ const Game = ({}) => {
   return (
     <Layout>
       <GameField letters={letters} handleField={handleField} />
+      {playernames.length < 2 &&
+      data.getGame.players![0].id === meData.data?.me?.id ? (
+        <div className={styles.tokenWrap}>
+          <Text className={styles.invitationText}>
+            Отправьте эту ссылку другу, чтобы пригласить его в игру.
+          </Text>
+          <input
+            onClick={(e) => {
+              e.currentTarget.select()
+              document.execCommand('copy');
+              console.log(`copying`);
+            }}
+            className={styles.tokenUrlInput}
+            defaultValue={tokenUrl}
+            
+          />
+        </div>
+      ) : null}{" "}
       <Keyboard
         username={turnUsername}
         turn={isMyTurn}

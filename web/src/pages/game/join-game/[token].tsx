@@ -37,8 +37,7 @@ const ChangePassword: NextPage = () => {
               }
             } else if (response.data?.connectToGame.game) {
               router.push(`/game/${response.data?.connectToGame.game.id}`);
-            }
-            console.log(tokenError, response);
+            }            
           }}
         >
           Присоединиться к игре

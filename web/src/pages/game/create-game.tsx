@@ -4,7 +4,6 @@ import { Button } from "src/components/basic/Button";
 import { Layout } from "src/components/basic/Layout";
 import {
   useCreateGameMutation,
-  useCreateInvitationMutation,
   useGenerateMutation,
 } from "src/generated/graphql";
 import { withApollo } from "src/utils/withApollo";
@@ -12,7 +11,7 @@ import { withApollo } from "src/utils/withApollo";
 export const CreateGame: React.FC = () => {
   const [createGame] = useCreateGameMutation();
   const [generateField] = useGenerateMutation();
-  const [createInvitation] = useCreateInvitationMutation();
+ 
   return (
     <Layout>
       <Button
@@ -23,19 +22,12 @@ export const CreateGame: React.FC = () => {
             variables: {
               gameId: id,
             },
-          });
-          const token = await createInvitation({
-            variables: {
-              gameId: id,
-            },
-          });
+          });          
           router.push({
             pathname: "/game/[id]",
             query: { id },
-          });
-          alert(
-            `Используйте эту ссылку для приглашения другого игрока: localhost:3000/game/join-game/${token.data?.createInvitation}`
-          );
+          });          
+     
         }}
       >
         Создать игру
