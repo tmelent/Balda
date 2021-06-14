@@ -1,14 +1,17 @@
 import * as React from "react";
 import { Flex } from "../basic/Flex";
 import styles from "../styles/keyboard.module.scss";
+import { Text } from "../basic/Text";
 import utilStyles from "../styles/utility.module.scss";
 interface KeyboardProps {
+  username: string;
   turn: boolean;
   handleFunction: Function;
   resetFunction: Function;
   sendFunction: Function;
 }
 export const Keyboard: React.FC<KeyboardProps> = ({
+  username,
   turn,
   handleFunction,
   resetFunction,
@@ -52,7 +55,6 @@ export const Keyboard: React.FC<KeyboardProps> = ({
   ];
 
   const handleClick = (key: string) => {
-    console.log(`${key} pressed. Handling...`);
     handleFunction(key);
   };
 
@@ -63,6 +65,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
   return (
     <div className={styles.keyboardWrap}>
       <Flex className={styles.buttonsWrap}>
+        <Text className={styles.turnText}>{turn ? `Ваш ход`:`Сейчас ходит: ${username}`}</Text>
         <div
           className={`${styles.submitBtn} ${utilStyles.unselectable}`}
           onClick={async () => await sendFunction()}
@@ -99,4 +102,3 @@ export const Keyboard: React.FC<KeyboardProps> = ({
     </div>
   );
 };
-

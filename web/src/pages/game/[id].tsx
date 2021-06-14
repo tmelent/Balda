@@ -57,11 +57,80 @@ const Game = ({}) => {
     };
   }, []);
 
+  let playernames: string[] = [];
+  let getGame = data?.getGame;
+  getGame?.players?.map((i) => playernames.push(i.username));
+  const isMyTurn =
+    getGame?.currentTurn ===
+    getGame?.players?.findIndex((i) => i.id === meData.data!.me!.id);
+
+  const turnUsername = playernames[getGame?.currentTurn!];
   // Fetching
-  if (loading) {
+  if (loading || !meData || !data) {
+    let _letters: Letter[] = new Array(25);
+    for (let i = 0; i < 25; i++) {
+      _letters.push({
+        boxNumber: i,
+        char: "",
+        filled: false,
+        id: i,
+        isNew: false,
+      });
+    }
+    if (networkStatus !== NetworkStatus.refetch) {
+      /** Fake game field on first loading. Re-rendering only gamefield */
+      return (
+        <Layout>
+          <GameField letters={[]} handleField={() => {}} />
+          <Keyboard
+            username={"..."}
+            turn={false}
+            handleFunction={() => {}}
+            resetFunction={() => {}}
+            sendFunction={() => {}}
+          />
+          <div className={styles.playerTableWrap}>
+            <PlayerTable
+              points={0}
+              currentTurn={true}
+              username={"Player 1"}
+              wordList={null}
+            />
+            <PlayerTable
+              points={0}
+              currentTurn={false}
+              username={"Player 2"}
+              wordList={null}
+            />
+          </div>
+        </Layout>
+      );
+    }
     return (
+      /** Smooth loading while refetching */
       <Layout>
-        <Text>Загрузка...</Text>
+        <GameField letters={[]} handleField={() => {}} />
+        <Keyboard
+          username={turnUsername}
+          turn={isMyTurn}
+          handleFunction={() => {}}
+          resetFunction={() => {}}
+          sendFunction={() => {}}
+        />
+        <div className={styles.playerTableWrap}>
+          <PlayerTable
+            points={data?.getGame?.scoreP1 ?? 0}
+            currentTurn={data?.getGame?.currentTurn === 0 ? true : false}
+            username={playernames[0]}
+            wordList={data?.getGame?.p1wordlist ?? null}
+          />
+          <PlayerTable
+            points={data?.getGame?.scoreP2 ?? 0}
+            currentTurn={data?.getGame?.currentTurn === 1 ? true : false}
+            username={playernames[1]}
+            wordList={data?.getGame?.p2wordlist ?? null}
+          />
+        </div>
       </Layout>
     );
   }
@@ -108,19 +177,11 @@ const Game = ({}) => {
     });
   }
 
-  // extracting game 
   const game = data.getGame;
-  // extracting playernames
-  let playernames: string[] = [];
-  data.getGame.players?.map((i) => playernames.push(i.username));
-  
-  const isMyTurn =
-    game.currentTurn ===
-    game.players?.findIndex((i) => i.id === meData.data!.me!.id);
 
-  /** 
+  /**
    * Making a turn with pre-checking
-   * */ 
+   * */
   const sendTurn = async () => {
     const some = wordState.some((i) => i.isNew === true);
     if (some) {
@@ -178,7 +239,7 @@ const Game = ({}) => {
   /**
    * Handles selection or insertion on field
    * @param e event
-   * @param chosenCell  
+   * @param chosenCell
    */
   const handleField = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -202,6 +263,7 @@ const Game = ({}) => {
     <Layout>
       <GameField letters={letters} handleField={handleField} />
       <Keyboard
+        username={turnUsername}
         turn={isMyTurn}
         handleFunction={handleInsertion}
         resetFunction={resetInsertion}

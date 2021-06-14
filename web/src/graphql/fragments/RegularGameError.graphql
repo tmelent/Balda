@@ -1,0 +1,4 @@
+fragment RegularGameError on GameFieldError {
+    field
+    message
+}

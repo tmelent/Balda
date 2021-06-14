@@ -48,6 +48,18 @@ export type GameField = {
   letters: Array<Letter>;
 };
 
+export type GameFieldError = {
+  __typename?: 'GameFieldError';
+  field: Scalars['String'];
+  message: Scalars['String'];
+};
+
+export type GameResponse = {
+  __typename?: 'GameResponse';
+  errors?: Maybe<Array<GameFieldError>>;
+  game?: Maybe<Game>;
+};
+
 export type Letter = {
   __typename?: 'Letter';
   id: Scalars['Float'];
@@ -59,7 +71,8 @@ export type Letter = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  connectToGame: Game;
+  connectToGame: GameResponse;
+  createInvitation: Scalars['String'];
   makeTurn: Game;
   createGame: Game;
   generateField?: Maybe<GameField>;
@@ -72,6 +85,11 @@ export type Mutation = {
 
 
 export type MutationConnectToGameArgs = {
+  token: Scalars['String'];
+};
+
+
+export type MutationCreateInvitationArgs = {
   gameId: Scalars['Float'];
 };
 
@@ -169,6 +187,22 @@ export type RegularErrorFragment = (
   & Pick<FieldError, 'field' | 'message'>
 );
 
+export type RegularGameErrorFragment = (
+  { __typename?: 'GameFieldError' }
+  & Pick<GameFieldError, 'field' | 'message'>
+);
+
+export type RegularGameResponseFragment = (
+  { __typename?: 'GameResponse' }
+  & { errors?: Maybe<Array<(
+    { __typename?: 'GameFieldError' }
+    & RegularGameErrorFragment
+  )>>, game?: Maybe<(
+    { __typename?: 'Game' }
+    & GameFragmentFragment
+  )> }
+);
+
 export type RegularUserFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'username'>
@@ -200,15 +234,15 @@ export type ChangePasswordMutation = (
 );
 
 export type ConnectMutationVariables = Exact<{
-  gameId: Scalars['Float'];
+  token: Scalars['String'];
 }>;
 
 
 export type ConnectMutation = (
   { __typename?: 'Mutation' }
   & { connectToGame: (
-    { __typename?: 'Game' }
-    & Pick<Game, 'createdAt' | 'scoreP1' | 'scoreP2' | 'initialWord' | 'status'>
+    { __typename?: 'GameResponse' }
+    & RegularGameResponseFragment
   ) }
 );
 
@@ -219,12 +253,18 @@ export type CreateGameMutation = (
   { __typename?: 'Mutation' }
   & { createGame: (
     { __typename?: 'Game' }
-    & Pick<Game, 'initialWord' | 'id' | 'status'>
-    & { players?: Maybe<Array<(
-      { __typename?: 'User' }
-      & Pick<User, 'id'>
-    )>> }
+    & Pick<Game, 'id'>
   ) }
+);
+
+export type CreateInvitationMutationVariables = Exact<{
+  gameId: Scalars['Float'];
+}>;
+
+
+export type CreateInvitationMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'createInvitation'>
 );
 
 export type ForgotPasswordMutationVariables = Exact<{
@@ -366,6 +406,12 @@ export type MeQuery = (
   )> }
 );
 
+export const RegularGameErrorFragmentDoc = gql`
+    fragment RegularGameError on GameFieldError {
+  field
+  message
+}
+    `;
 export const GameFragmentFragmentDoc = gql`
     fragment GameFragment on Game {
   id
@@ -393,6 +439,17 @@ export const GameFragmentFragmentDoc = gql`
   currentTurn
 }
     `;
+export const RegularGameResponseFragmentDoc = gql`
+    fragment RegularGameResponse on GameResponse {
+  errors {
+    ...RegularGameError
+  }
+  game {
+    ...GameFragment
+  }
+}
+    ${RegularGameErrorFragmentDoc}
+${GameFragmentFragmentDoc}`;
 export const RegularErrorFragmentDoc = gql`
     fragment RegularError on FieldError {
   field
@@ -451,16 +508,12 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const ConnectDocument = gql`
-    mutation Connect($gameId: Float!) {
-  connectToGame(gameId: $gameId) {
-    createdAt
-    scoreP1
-    scoreP2
-    initialWord
-    status
+    mutation Connect($token: String!) {
+  connectToGame(token: $token) {
+    ...RegularGameResponse
   }
 }
-    `;
+    ${RegularGameResponseFragmentDoc}`;
 export type ConnectMutationFn = Apollo.MutationFunction<ConnectMutation, ConnectMutationVariables>;
 
 /**
@@ -476,7 +529,7 @@ export type ConnectMutationFn = Apollo.MutationFunction<ConnectMutation, Connect
  * @example
  * const [connectMutation, { data, loading, error }] = useConnectMutation({
  *   variables: {
- *      gameId: // value for 'gameId'
+ *      token: // value for 'token'
  *   },
  * });
  */
@@ -490,12 +543,7 @@ export type ConnectMutationOptions = Apollo.BaseMutationOptions<ConnectMutation,
 export const CreateGameDocument = gql`
     mutation createGame {
   createGame {
-    initialWord
     id
-    status
-    players {
-      id
-    }
   }
 }
     `;
@@ -524,6 +572,37 @@ export function useCreateGameMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateGameMutationHookResult = ReturnType<typeof useCreateGameMutation>;
 export type CreateGameMutationResult = Apollo.MutationResult<CreateGameMutation>;
 export type CreateGameMutationOptions = Apollo.BaseMutationOptions<CreateGameMutation, CreateGameMutationVariables>;
+export const CreateInvitationDocument = gql`
+    mutation createInvitation($gameId: Float!) {
+  createInvitation(gameId: $gameId)
+}
+    `;
+export type CreateInvitationMutationFn = Apollo.MutationFunction<CreateInvitationMutation, CreateInvitationMutationVariables>;
+
+/**
+ * __useCreateInvitationMutation__
+ *
+ * To run a mutation, you first call `useCreateInvitationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateInvitationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createInvitationMutation, { data, loading, error }] = useCreateInvitationMutation({
+ *   variables: {
+ *      gameId: // value for 'gameId'
+ *   },
+ * });
+ */
+export function useCreateInvitationMutation(baseOptions?: Apollo.MutationHookOptions<CreateInvitationMutation, CreateInvitationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateInvitationMutation, CreateInvitationMutationVariables>(CreateInvitationDocument, options);
+      }
+export type CreateInvitationMutationHookResult = ReturnType<typeof useCreateInvitationMutation>;
+export type CreateInvitationMutationResult = Apollo.MutationResult<CreateInvitationMutation>;
+export type CreateInvitationMutationOptions = Apollo.BaseMutationOptions<CreateInvitationMutation, CreateInvitationMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)

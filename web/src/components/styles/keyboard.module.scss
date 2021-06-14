@@ -3,14 +3,14 @@
   width: 6rem;
   height: 6rem;
   margin: 0.25rem;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: rgb(236, 226, 226);
-  border: .15rem solid rgba(255,255,255,0.3);
+  border: 0.15rem solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  font-weight: 500; 
+  font-weight: 500;
   border-radius: 1.5rem;
   -webkit-box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
   -moz-box-shadow: 4px 4px 27px -5px rgba(34, 60, 80, 0.12);
@@ -27,9 +27,19 @@
   }
 }
 
+.turnText {
+  margin-left: 3rem;
+  color: white;
+  font-size: 2.25rem;
+  font-family: "Nunito";
+  font-weight: 700;
+}
 .buttonsWrap {
   width: 100%;
   gap: 2rem;
+  padding-bottom: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .keyboardWrap {

@@ -3,8 +3,10 @@ import { MyContext } from "../types";
 import {
   Arg,
   Ctx,
+  Field,
   FieldResolver,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   Root,
@@ -17,11 +19,29 @@ import { GameField } from "../entities/GameField";
 import { Letter } from "../entities/Letter";
 import { dictionary } from "../dictionary/dictionary";
 import { CellInput } from "../entities/CellInput";
+import { v4 } from "uuid";
+import { JOIN_GAME_PREFIX } from "../../dev_constants/connections";
 /**
  *
  * TODO:
  * - word list
  *  */
+@ObjectType()
+class GameFieldError {
+  @Field()
+  field: string;
+  @Field()
+  message: string;
+}
+
+@ObjectType()
+class GameResponse {
+  @Field(() => [GameFieldError], { nullable: true })
+  errors?: GameFieldError[];
+
+  @Field(() => Game, { nullable: true })
+  game?: Game;
+}
 
 @Resolver(Game)
 export class GameResolver {
@@ -51,30 +71,107 @@ export class GameResolver {
    * @param gameId Id of current game
    * @returns Updated game
    */
-  @Mutation(() => Game)
+  @Mutation(() => GameResponse)
   async connectToGame(
-    @Ctx() { req }: MyContext,
-    @Arg("gameId") gameId: number
-  ) {
-    // Attempt to find game and user
-    const game = await Game.findOne({ id: gameId }, { relations: ["players"] });
+    @Arg("token") token: string,
+    @Ctx() { redis, req }: MyContext
+  ): Promise<GameResponse> {
+    const key = JOIN_GAME_PREFIX + token;
+    const gameId = await redis.get(key);
+    if (!gameId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
+    }
+
+    const gameIdNum = parseInt(gameId);
+    const game = await Game.findOne(
+      { id: gameIdNum },
+      { relations: ["players"] }
+    );
     const user = await User.findOne(
       { id: req.session.userId },
       { relations: ["games"] }
     );
-    if (game && user) {
-      console.log(game);
-      game.players.map((i) => console.log(i.id));
-      if (!game.players.includes(user)) {
-        // Add new game to current user's game list
-        user.games = [...user.games, game];
-        await getRepository(User).save(user);
-        console.log(`User ${user.username} connected to game #${gameId}`);
-        return game;
-      }
-      return new Error("You are already in game");
+    if (!game) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "game no longer exists",
+          },
+        ],
+      };
     }
-    return game;
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user doesn't exist",
+          },
+        ],
+      };
+    }
+
+    try {
+      // await User.update(
+      //   { id: req.session.userId },
+      //   { games: [...user.games, game] }
+      // );
+      user.games = [...user.games, game];
+      await getRepository(User).save(user);
+      await redis.del(key);
+    } catch (error) {
+      console.error(error);
+    }
+    return { game };
+    // // Attempt to find game and use
+    // const game = await Game.findOne({ id: gameId }, { relations: ["players"] });
+    // const user = await User.findOne(
+    //   { id: req.session.userId },
+    //   { relations: ["games"] }
+    // );
+    // if (game && user) {
+    //   console.log(game);
+    //   game.players.map((i) => console.log(i.id));
+    //   if (!game.players.includes(user)) {
+    //     // Add new game to current user's game list
+    //     user.games = [...user.games, game];
+    //     await getRepository(User).save(user);
+    //     console.log(`User ${user.username} connected to game #${gameId}`);
+    //     return game;
+    //   }
+    //   return new Error("You are already in game");
+    // }
+    // return game;
+  }
+
+  @Mutation(() => String)
+  async createInvitation(
+    @Arg("gameId") gameId: number,
+    @Ctx() { redis }: MyContext
+  ): Promise<string> {
+    const game = await Game.findOne({ where: { id: gameId } });
+    if (!game) {
+      return "";
+    }
+    const token = v4();
+
+    await redis.set(
+      JOIN_GAME_PREFIX + token,
+      gameId,
+      "ex",
+      1000 * 60 * 60 * 24
+      // 1 day exp token
+    );
+    return token;
   }
 
   /**

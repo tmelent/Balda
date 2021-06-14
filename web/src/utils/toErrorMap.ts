@@ -1,6 +1,7 @@
-import {FieldError} from '../generated/graphql';
+import {FieldError, GameFieldError} from '../generated/graphql';
 
-export const toErrorMap = (errors: FieldError[] ) => {
+type FError = FieldError[] | GameFieldError[];
+export const toErrorMap = (errors: FError) => {
     const errorMap: Record<string, string> = {};
     errors.forEach(({field, message}) => {
         errorMap[field] = message;

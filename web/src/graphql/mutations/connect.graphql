@@ -1,9 +1,5 @@
-mutation Connect($gameId: Float!){
-  connectToGame(gameId: $gameId){
-    createdAt
-    scoreP1
-    scoreP2
-    initialWord
-    status    
+mutation Connect($token: String!){
+  connectToGame(token:$token){
+    ...RegularGameResponse    
   }
 }

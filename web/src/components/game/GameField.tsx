@@ -5,12 +5,12 @@ import { Text } from "../basic/Text";
 import styles from "../styles/gameFieldGridVersion.module.scss";
 interface GameFieldProps {
   letters: Letter[];
-  handleField: Function;
+  handleField: Function;  
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
   letters,
-  handleField,
+  handleField,  
 }) => {
   var rows = [];
   for (var i = 0; i < letters.length; i += 5) {

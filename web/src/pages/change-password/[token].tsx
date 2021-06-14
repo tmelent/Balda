@@ -1,23 +1,22 @@
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
-import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { InputField } from "../../components/forms/InputField";
-import { Wrapper } from "../../components/basic/Wrapper";
-import { useChangePasswordMutation } from "../../generated/graphql";
-import { createUrqlClient } from "../../utils/createUrqlClient";
-import { toErrorMap } from "../../utils/toErrorMap";
-import { Link } from "../../components/basic/Link";
+import { withApollo } from "src/utils/withApollo";
 import { Button } from "../../components/basic/Button";
-import styles from "../components/styles/login.module.scss";
+import { Link } from "../../components/basic/Link";
+import { Wrapper } from "../../components/basic/Wrapper";
+import { InputField } from "../../components/forms/InputField";
 import { NavBar } from "../../components/NavBar";
+import { useChangePasswordMutation } from "../../generated/graphql";
+import { toErrorMap } from "../../utils/toErrorMap";
+import styles from "../components/styles/login.module.scss";
 
 // Change password form. Can be accessed only with correct token
 const ChangePassword: NextPage = () => {
   const router = useRouter();
-  const [, changePassword] = useChangePasswordMutation();
+  const [changePassword] = useChangePasswordMutation();
   const [tokenError, setTokenError] = useState("");
   return (
     <>
@@ -27,11 +26,13 @@ const ChangePassword: NextPage = () => {
           initialValues={{ newPassword: "" }}
           onSubmit={async (values, { setErrors }) => {
             const response = await changePassword({
-              newPassword: values.newPassword,
-              token:
-                typeof router.query.token === "string"
-                  ? router.query.token
-                  : "",
+              variables: {
+                newPassword: values.newPassword,
+                token:
+                  typeof router.query.token === "string"
+                    ? router.query.token
+                    : "",
+              },
             });
             if (response.data?.changePassword.errors) {
               const errorMap = toErrorMap(response.data.changePassword.errors);
@@ -73,4 +74,4 @@ const ChangePassword: NextPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(ChangePassword);
+export default withApollo({ ssr: false })(ChangePassword);

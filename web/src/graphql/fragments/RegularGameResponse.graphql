@@ -1,0 +1,8 @@
+fragment RegularGameResponse on GameResponse {
+  errors {
+    ...RegularGameError
+  }
+  game {
+    ...GameFragment
+  }
+}
