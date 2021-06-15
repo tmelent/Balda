@@ -1,0 +1,5 @@
+mutation MakeConfirmedTurn($word: [CellInput!]!, $gameId: Float!, $stringWord: String!) {
+    makeConfirmedTurn(word: $word, gameId: $gameId, stringWord: $stringWord) {
+      ...GameFragment
+    }
+  }

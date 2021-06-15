@@ -19,6 +19,7 @@ import {
   CellInput,
   Letter,
   useCreateInvitationMutation,
+  useMakeConfirmedTurnMutation,
   useMakeTurnMutation,
   useMeQuery,
 } from "../../generated/graphql";
@@ -48,7 +49,10 @@ const Game = ({}) => {
 
   const [createInvitation] = useCreateInvitationMutation();
   const [tokenUrl, updateUrl] = useState("");
-
+  const [makeConfirmedTurn] = useMakeConfirmedTurnMutation();
+  if (!socket) {
+    setSocket(socketIOClient("localhost:4000"));
+  }
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
    * "selection" phase - can't insert values, can only select filled cells (and new one too)
@@ -56,12 +60,35 @@ const Game = ({}) => {
   const [phaseState, togglePhase] = useState(phaseInitialState);
 
   useEffect(() => {
-    setSocket(socketIOClient("localhost:4000"));
-    return () => {
-      if (socket) {
-        socket.off();
-      }
-    };
+    if (socket) {
+      console.log(socket!.id);
+      socket.on("askWordConfirmation", (data) => {
+        const { word, gameId, stringWord } = data;
+        if (
+          confirm(
+            `Ваш оппонент хочет использовать слово ${data.stringWord}, которого нет в словаре. Разрешить?`
+          )
+        ) {
+          socket.emit("turnConfirmed", { word, gameId, stringWord });
+        } else {
+          console.log(`not confirmed`);
+        }
+      });
+      socket.once("yourWordConfirmed", async (gameData) => {
+        console.log(`yourwordconfirmed event`);
+        const { word, gameId, stringWord } = gameData;
+        await makeConfirmedTurn({
+          variables: {
+            gameId,
+            word,
+            stringWord,
+          },
+        });
+        refetch();
+        updateWordState([]);
+        socket.emit("fieldUpdated", gameId);
+      });
+    }
   }, []);
   let playernames: string[] = [];
   let getGame = data?.getGame;
@@ -175,7 +202,7 @@ const Game = ({}) => {
   }
 
   // Listening to socket
-  if (socket) {
+  if (socket) { 
     // When a new player joins the game
     socket.on("playerJoined", (socketId) => {
       console.log(`player: socketId: ${socketId}`);
@@ -185,13 +212,12 @@ const Game = ({}) => {
       togglePhase({
         cell: null,
         phase: "insertion",
-      });
-
-      refetch().then((res) =>
+      });      
+      refetch().then((res) => {
         updateLetters(
           _.cloneDeep(res.data.getGame?.gameField.letters) as Letter[]
-        )
-      );
+        );        
+      });
     });
   }
 
@@ -209,6 +235,7 @@ const Game = ({}) => {
             gameId: game.id,
             confirmed: false,
             word: wordState as CellInput[],
+            socketId: socket!.id,
           },
         });
         refetch();
@@ -288,13 +315,12 @@ const Game = ({}) => {
           </Text>
           <input
             onClick={(e) => {
-              e.currentTarget.select()
-              document.execCommand('copy');
+              e.currentTarget.select();
+              document.execCommand("copy");
               console.log(`copying`);
             }}
             className={styles.tokenUrlInput}
             defaultValue={tokenUrl}
-            
           />
         </div>
       ) : null}{" "}

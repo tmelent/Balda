@@ -1,5 +1,5 @@
-mutation MakeTurn($confirmed: Boolean, $word: [CellInput!]!, $gameId: Float!) {
-  makeTurn(confirmed: $confirmed, word: $word, gameId: $gameId) {
+mutation MakeTurn($confirmed: Boolean, $word: [CellInput!]!, $gameId: Float!, $socketId: String!) {
+  makeTurn(confirmed: $confirmed, word: $word, gameId: $gameId, socketId: $socketId) {
     ...GameFragment
   }
 }

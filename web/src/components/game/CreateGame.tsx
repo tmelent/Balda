@@ -1,19 +1,18 @@
 import router from "next/router";
 import * as React from "react";
+
 import { Button } from "src/components/basic/Button";
-import { Layout } from "src/components/basic/Layout";
 import {
   useCreateGameMutation,
   useGenerateMutation,
 } from "src/generated/graphql";
 import { withApollo } from "src/utils/withApollo";
-
+import styles from "../../components/styles/utility.module.scss";
 export const CreateGame: React.FC = () => {
   const [createGame] = useCreateGameMutation();
   const [generateField] = useGenerateMutation();
  
-  return (
-    <Layout>
+  return (    
       <Button
         onClick={async () => {
           const response = await createGame();
@@ -29,10 +28,10 @@ export const CreateGame: React.FC = () => {
           });          
      
         }}
+        className={styles.createGameBtn}
       >
         Создать игру
-      </Button>
-    </Layout>
+      </Button>    
   );
 };
 

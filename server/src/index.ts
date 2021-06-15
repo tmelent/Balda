@@ -26,7 +26,7 @@ import { GameFieldResolver } from "./resolvers/gameField";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
 import { GraphQLUtil } from "./utils/gqlCall";
-import {MAKE_TURN} from "./graphql/mutations";
+import { MAKE_CONFIRMED_TURN } from "./graphql/mutations";
 
 const main = async () => {
   const conn = await createConnection({
@@ -86,6 +86,7 @@ const main = async () => {
       req,
       res,
       redis,
+      io,
     }),
     playground: true,
   });
@@ -107,25 +108,28 @@ const main = async () => {
 
   const io = new Server(httpServer, options);
 
-  io.on("connection", (socket: Socket, ) => {
+  io.on("connection", (socket: Socket) => {
+    exports.socket = socket;
+    exports.io = io;
     socket.emit("connection");
-    socket.on("connectionToRoom", room => {
-      console.log(`${socket.id} tries to connect to room ${room}`);
-      socket.join(room);
+    socket.on("connectionToRoom", (room) => {
+      console.log(`${socket.id} connected to room ${room}`);
+      io.socketsJoin(`${room}`);
+      console.log(socket.rooms);
       io.sockets.in(room).emit("playerJoined", socket.id);
-      // io.to(room).emit("playerJoined", socket.id);
-      // socket.to(room).emit("playerJoined", socket.id);
-    })
+    });
     socket.on("fieldUpdated", (room) => {
-      io.sockets.in(room).emit("updateGame");
-    })
-    socket.on("turnConfirmed", (data) => {
-      const { word, gameId } = data;
-      graphqlUtil.call({
-        source: MAKE_TURN,
-        userId: data.userId,
-        variableValues: { confirmed: true, word, gameId },
-      });
+      console.log(`field updated: ${room}`)
+      console.log(socket.rooms);
+      socket.to(`${room}`).emit("updateGame");     
+    });
+    socket.on("turnConfirmed",async  (data) => {
+      const socketIds = (
+        await io.in(`${data.gameId}`).fetchSockets()
+      ).map((i) => i.id);
+      const opponentSocketId = socketIds.find((i) => i !== socket.id);
+     
+      io.to(`${opponentSocketId}`).emit("yourWordConfirmed", data);     
     });
   });
 

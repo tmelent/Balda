@@ -24,6 +24,7 @@ export class GraphQLUtil {
    * @param userId - user id from session 
    */
   call = async ({ source, variableValues, userId }: Options) => {
+    console.log(`calling: ${source} ${variableValues} ${userId} `)
     return graphql({
       schema: this.schema,
       source,
@@ -33,10 +34,7 @@ export class GraphQLUtil {
           session: {
             userId,
           },
-        },
-        res: {
-          clearCookie: jest.fn(),
-        },
+        },        
       },
     });
   };

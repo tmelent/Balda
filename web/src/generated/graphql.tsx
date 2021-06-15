@@ -74,6 +74,7 @@ export type Mutation = {
   connectToGame: GameResponse;
   createInvitation: Scalars['String'];
   makeTurn: Game;
+  makeConfirmedTurn?: Maybe<Game>;
   createGame: Game;
   generateField?: Maybe<GameField>;
   changePassword: UserResponse;
@@ -95,7 +96,15 @@ export type MutationCreateInvitationArgs = {
 
 
 export type MutationMakeTurnArgs = {
+  socketId: Scalars['String'];
   confirmed?: Maybe<Scalars['Boolean']>;
+  word: Array<CellInput>;
+  gameId: Scalars['Float'];
+};
+
+
+export type MutationMakeConfirmedTurnArgs = {
+  stringWord: Scalars['String'];
   word: Array<CellInput>;
   gameId: Scalars['Float'];
 };
@@ -316,10 +325,26 @@ export type LogoutMutation = (
   & Pick<Mutation, 'logout'>
 );
 
+export type MakeConfirmedTurnMutationVariables = Exact<{
+  word: Array<CellInput> | CellInput;
+  gameId: Scalars['Float'];
+  stringWord: Scalars['String'];
+}>;
+
+
+export type MakeConfirmedTurnMutation = (
+  { __typename?: 'Mutation' }
+  & { makeConfirmedTurn?: Maybe<(
+    { __typename?: 'Game' }
+    & GameFragmentFragment
+  )> }
+);
+
 export type MakeTurnMutationVariables = Exact<{
   confirmed?: Maybe<Scalars['Boolean']>;
   word: Array<CellInput> | CellInput;
   gameId: Scalars['Float'];
+  socketId: Scalars['String'];
 }>;
 
 
@@ -734,9 +759,49 @@ export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<Logou
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export const MakeConfirmedTurnDocument = gql`
+    mutation MakeConfirmedTurn($word: [CellInput!]!, $gameId: Float!, $stringWord: String!) {
+  makeConfirmedTurn(word: $word, gameId: $gameId, stringWord: $stringWord) {
+    ...GameFragment
+  }
+}
+    ${GameFragmentFragmentDoc}`;
+export type MakeConfirmedTurnMutationFn = Apollo.MutationFunction<MakeConfirmedTurnMutation, MakeConfirmedTurnMutationVariables>;
+
+/**
+ * __useMakeConfirmedTurnMutation__
+ *
+ * To run a mutation, you first call `useMakeConfirmedTurnMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMakeConfirmedTurnMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [makeConfirmedTurnMutation, { data, loading, error }] = useMakeConfirmedTurnMutation({
+ *   variables: {
+ *      word: // value for 'word'
+ *      gameId: // value for 'gameId'
+ *      stringWord: // value for 'stringWord'
+ *   },
+ * });
+ */
+export function useMakeConfirmedTurnMutation(baseOptions?: Apollo.MutationHookOptions<MakeConfirmedTurnMutation, MakeConfirmedTurnMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MakeConfirmedTurnMutation, MakeConfirmedTurnMutationVariables>(MakeConfirmedTurnDocument, options);
+      }
+export type MakeConfirmedTurnMutationHookResult = ReturnType<typeof useMakeConfirmedTurnMutation>;
+export type MakeConfirmedTurnMutationResult = Apollo.MutationResult<MakeConfirmedTurnMutation>;
+export type MakeConfirmedTurnMutationOptions = Apollo.BaseMutationOptions<MakeConfirmedTurnMutation, MakeConfirmedTurnMutationVariables>;
 export const MakeTurnDocument = gql`
-    mutation MakeTurn($confirmed: Boolean, $word: [CellInput!]!, $gameId: Float!) {
-  makeTurn(confirmed: $confirmed, word: $word, gameId: $gameId) {
+    mutation MakeTurn($confirmed: Boolean, $word: [CellInput!]!, $gameId: Float!, $socketId: String!) {
+  makeTurn(
+    confirmed: $confirmed
+    word: $word
+    gameId: $gameId
+    socketId: $socketId
+  ) {
     ...GameFragment
   }
 }
@@ -759,6 +824,7 @@ export type MakeTurnMutationFn = Apollo.MutationFunction<MakeTurnMutation, MakeT
  *      confirmed: // value for 'confirmed'
  *      word: // value for 'word'
  *      gameId: // value for 'gameId'
+ *      socketId: // value for 'socketId'
  *   },
  * });
  */

@@ -21,11 +21,11 @@ import { dictionary } from "../dictionary/dictionary";
 import { CellInput } from "../entities/CellInput";
 import { v4 } from "uuid";
 import { JOIN_GAME_PREFIX } from "../../dev_constants/connections";
-/**
- *
- * TODO:
- * - word list
- *  */
+import { Server, Socket } from "socket.io";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+
+// import { Socket } from "socket.io";
+
 @ObjectType()
 class GameFieldError {
   @Field()
@@ -46,6 +46,7 @@ class GameResponse {
 @Resolver(Game)
 export class GameResolver {
   // Joining user to game
+
   @FieldResolver(() => [User], { nullable: true })
   async players(@Root() game: Game) {
     const p = await getRepository(Game)
@@ -65,7 +66,6 @@ export class GameResolver {
   async gameField(@Root() game: Game) {
     return await GameField.findOne({ where: { game } });
   }
-
 
   /**
    * Connects user to existing game as player #2.
@@ -170,7 +170,8 @@ export class GameResolver {
     @Arg("gameId") gameId: number,
     @Arg("word", () => [CellInput]) word: CellInput[],
     @Arg("confirmed", { defaultValue: false }) confirmed: boolean,
-    @Ctx() { req }: MyContext
+    @Arg("socketId") socketId: string,
+    @Ctx() { req, io }: MyContext
   ) {
     // Trying to find game, gameField and current user in DB
     const game = await Game.findOne({ id: gameId }, { relations: ["players"] });
@@ -179,6 +180,7 @@ export class GameResolver {
     // Index of player in game.players
     let playerNum;
     // Checking if user is connected to the game
+
     try {
       if (currUser && game) {
         if (currUser.id === game.players[0].id) {
@@ -272,18 +274,90 @@ export class GameResolver {
             return updatedGame;
           }
 
-          throw new Error(
-            "Word doesn't exist in dictionary, if you're not agree with that, send word confirmation back."
-          );
+          const serv = require("../index");
+
+          const socketIds = (
+            await (serv.io as Server).in(`${gameId}`).fetchSockets()
+          ).map((i) => i.id);
+          console.log(socketIds);
+
+          console.log(`clients count: ${io.engine.clientsCount}`);
+
+          const opponentSocketId = socketIds.find((i) => i !== socketId);
+          console.log(opponentSocketId);
+          if (opponentSocketId) {
+            (serv.io as Server)
+              .to(opponentSocketId!)
+              .emit("askWordConfirmation", {
+                gameId,
+                word,
+                confirmed,
+                stringWord,
+              });
+          }
+          return new Error("Waiting for confirmation...");
         }
         throw new Error("It is not your turn!");
       }
+
       throw new Error("Game doesn't exist or you aren't authorized.");
     } catch (error) {
       return new Error(`${error.message}`);
     }
   }
 
+  @Mutation(() => Game, { nullable: true })
+  async makeConfirmedTurn(
+    @Arg("gameId") gameId: number,
+    @Arg("word", () => [CellInput]) word: CellInput[],
+    @Arg("stringWord") stringWord: string,
+    @Ctx() { req }: MyContext
+  ) {
+    console.log(`makeConfirmedTurn: ${gameId}, ${stringWord}`);
+    const game = await Game.findOne({ id: gameId }, { relations: ["players"] });
+    if (game) {
+      const gameField = await GameField.findOne({ where: { gameId } });
+      const currUserId = (await User.findOne({ id: req.session.userId }))!.id;
+      const newCell = word.find((i) => i.isNew === true);
+      const emptyCell = await Letter.findOne({
+        where: { boxNumber: newCell?.boxNumber, gameField },
+      });
+
+      let playerNum;
+      if (currUserId === game.players[0].id) {
+        playerNum = 0;
+      } else {
+        if (currUserId === game.players[1].id) {
+          playerNum = 1;
+        } else {
+          throw new Error("You are not connected to this game.");
+        }
+      }
+      if (playerNum === 0) {
+        game.scoreP1 += stringWord.length;
+        game.p1wordlist.push(stringWord);
+      } else {
+        game.scoreP2 += stringWord.length;
+        game.p2wordlist.push(stringWord);
+      }
+
+      game.currentTurn = playerNum === 0 ? 1 : 0;
+      // Updating game
+      const updatedGame = await getRepository(Game).save(game);
+      console.log(emptyCell);
+      // Updating cell
+      await getRepository(Letter).save({
+        id: emptyCell!.id,
+        char: newCell!.char,
+        filled: true,
+        isNew: false,
+        boxNumber: emptyCell!.boxNumber,
+        gameField,
+      });
+      return updatedGame;
+    }
+    throw new Error("Game wasn't found.");
+  }
   /**
    * Returns game info by its id.
    * @param gameId Game id

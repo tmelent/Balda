@@ -8,6 +8,7 @@ import styles from "./styles/navbar.module.scss";
 import utilStyles from "./styles/utility.module.scss";
 import {Link} from "./basic/Link";
 import {Text} from "./basic/Text";
+import CreateGame from "./game/CreateGame";
 
 export const NavBar: React.FC = () => {
   const [logout, {loading: logoutFetching }] = useLogoutMutation();
@@ -33,9 +34,9 @@ export const NavBar: React.FC = () => {
   } else {
     body = (
       <Flex className={`${utilStyles.alignCenter} ${utilStyles.gap4}`}>
+        <CreateGame/>
         <Text className={styles.navbarText}>{data.me.username}</Text>
-        <Link          
-          
+        <Link                    
           onClick={async () => {
             await logout();
             router.reload();
