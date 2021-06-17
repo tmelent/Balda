@@ -1,5 +1,6 @@
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
+import "dotenv-safe/config";
 import cors from "cors";
 import express from "express";
 import session from "express-session";
@@ -9,14 +10,8 @@ import path from "path";
 import "reflect-metadata";
 import { Server, Socket } from "socket.io";
 import { buildSchema } from "type-graphql";
-// import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
-import {
-  COOKIE_NAME,
-  CORS_ORIGIN,
-  PORT,
-  __prod__,
-} from "../dev_constants/connections";
+import { COOKIE_NAME, __prod__ } from "../dev_constants/connections";
 import { Game } from "./entities/Game";
 import { GameField } from "./entities/GameField";
 import { Letter } from "./entities/Letter";
@@ -25,31 +20,29 @@ import { GameResolver } from "./resolvers/game";
 import { GameFieldResolver } from "./resolvers/gameField";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
-import { GraphQLUtil } from "./utils/gqlCall";
-import { MAKE_CONFIRMED_TURN } from "./graphql/mutations";
 
 const main = async () => {
+  console.log(process.env.DATABASE_URL);
   const conn = await createConnection({
     type: "postgres",
-    database: "balda",
-    username: "postgres",
-    password: "postgres",
+    url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,
+    // synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, GameField, Game, Letter],
   });
 
-  await conn.runMigrations();
+  console.log(process.env.PORT, process.env.REDIS_URL, process.env.DATABASE_URL)
+  // await conn.runMigrations();
 
   const app = express();
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
-
+  const redis = new Redis(process.env.REDIS_URL);
+  app.set("trust proxy", 1);
   app.use(
     cors({
-      origin: CORS_ORIGIN,
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   );
@@ -66,9 +59,10 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__,
+        domain: __prod__ ? "" : undefined,
       },
       saveUninitialized: false,
-      secret: "jaiodsjaadfsdfiofho2512312f",
+      secret: process.env.SESSION_SECRET!,
       resave: false,
     })
   );
@@ -77,8 +71,6 @@ const main = async () => {
     resolvers: [UserResolver, GameResolver, GameFieldResolver],
     validate: false,
   });
-
-  const graphqlUtil = new GraphQLUtil(gqlSchema);
 
   const apolloServer = new ApolloServer({
     schema: gqlSchema,
@@ -99,7 +91,7 @@ const main = async () => {
 
   const options = {
     cors: {
-      origin: CORS_ORIGIN,
+      origin: process.env.CORS_ORIGIN!,
       methods: ["GET", "POST"],
       allowedHeaders: ["balda-socket-header"],
       credentials: true,
@@ -119,22 +111,22 @@ const main = async () => {
       io.sockets.in(room).emit("playerJoined", socket.id);
     });
     socket.on("fieldUpdated", (room) => {
-      console.log(`field updated: ${room}`)
+      console.log(`field updated: ${room}`);
       console.log(socket.rooms);
-      socket.to(`${room}`).emit("updateGame");     
+      socket.to(`${room}`).emit("updateGame");
     });
-    socket.on("turnConfirmed",async  (data) => {
-      const socketIds = (
-        await io.in(`${data.gameId}`).fetchSockets()
-      ).map((i) => i.id);
+    socket.on("turnConfirmed", async (data) => {
+      const socketIds = (await io.in(`${data.gameId}`).fetchSockets()).map(
+        (i) => i.id
+      );
       const opponentSocketId = socketIds.find((i) => i !== socket.id);
-     
-      io.to(`${opponentSocketId}`).emit("yourWordConfirmed", data);     
+
+      io.to(`${opponentSocketId}`).emit("yourWordConfirmed", data);
     });
   });
 
-  httpServer.listen(PORT, () => {
-    console.log(`server started on http://localhost:${PORT}`);
+  httpServer.listen(parseInt(process.env.PORT!), () => {
+    console.log(`server started on http://localhost:${process.env.PORT}`);
   });
 };
 
