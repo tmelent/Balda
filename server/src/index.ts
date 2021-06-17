@@ -21,19 +21,25 @@ import { GameFieldResolver } from "./resolvers/gameField";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
 
-
 const main = async () => {
   console.log(process.env.DATABASE_URL);
   const conn = await createConnection({
     type: "postgres",
     url: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
     logging: true,
     // synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, GameField, Game, Letter],
   });
 
-  console.log(process.env.PORT, process.env.REDIS_URL, process.env.DATABASE_URL)
+  console.log(
+    process.env.PORT,
+    process.env.REDIS_URL,
+    process.env.DATABASE_URL
+  );
   // await conn.runMigrations();
 
   const app = express();
