@@ -20,7 +20,7 @@ import { Letter } from "../entities/Letter";
 import { dictionary } from "../dictionary/dictionary";
 import { CellInput } from "../entities/CellInput";
 import { v4 } from "uuid";
-import { JOIN_GAME_PREFIX } from "../../dev_constants/connections";
+import { JOIN_GAME_PREFIX } from "../connections";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 

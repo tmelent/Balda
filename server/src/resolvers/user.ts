@@ -16,7 +16,7 @@ import { v4 } from "uuid";
 import {
   COOKIE_NAME,
   FORGET_PASSWORD_PREFIX,
-} from "../../dev_constants/connections";
+} from "../connections";
 import { User } from "../entities/User";
 import { MyContext } from "../types";
 // import { sendEmail } from "../utils/sendEmail";

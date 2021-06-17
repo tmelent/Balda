@@ -11,7 +11,7 @@ import "reflect-metadata";
 import { Server, Socket } from "socket.io";
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
-import { COOKIE_NAME, __prod__ } from "../dev_constants/connections";
+import { COOKIE_NAME, __prod__ } from "./connections";
 import { Game } from "./entities/Game";
 import { GameField } from "./entities/GameField";
 import { Letter } from "./entities/Letter";
@@ -20,6 +20,7 @@ import { GameResolver } from "./resolvers/game";
 import { GameFieldResolver } from "./resolvers/gameField";
 import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
+
 
 const main = async () => {
   console.log(process.env.DATABASE_URL);
