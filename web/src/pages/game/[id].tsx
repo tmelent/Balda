@@ -74,7 +74,7 @@ const Game = ({}) => {
           console.log(`not confirmed`);
         }
       });
-      socket.once("yourWordConfirmed", async (gameData) => {
+      socket.on("yourWordConfirmed", async (gameData) => {
         console.log(`yourwordconfirmed event`);
         const { word, gameId, stringWord } = gameData;
         await makeConfirmedTurn({

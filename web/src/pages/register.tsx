@@ -8,7 +8,7 @@ import { InputField } from "../components/forms/InputField";
 import { NavBar } from "../components/NavBar";
 import styles from "../components/styles/login.module.scss";
 import utilStyles from "../components/styles/utility.module.scss";
-import { useRegisterMutation } from "../generated/graphql";
+import { MeDocument, MeQuery, useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 export const Register: React.FC<{}> = ({}) => {
   const router = useRouter();
@@ -20,7 +20,18 @@ export const Register: React.FC<{}> = ({}) => {
         <Formik
           initialValues={{ email: "", username: "", password: "" }}
           onSubmit={async (values, { setErrors }) => {
-            const response = await register({ variables: { options: values } });
+            const response = await register({
+            variables: { options: values },
+            update: (cache, { data }) => {
+              cache.writeQuery<MeQuery>({
+                query: MeDocument,
+                data: {
+                  __typename: "Query",
+                  me: data?.register.user,
+                },
+              });
+            },
+          });
             if (response.data?.register.errors) {
               setErrors(toErrorMap(response.data.register.errors));
             } else if (response.data?.register.user) {
