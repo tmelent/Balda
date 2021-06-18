@@ -51,7 +51,7 @@ const Game = ({}) => {
   const [tokenUrl, updateUrl] = useState("");
   const [makeConfirmedTurn] = useMakeConfirmedTurnMutation();
   if (!socket) {
-    setSocket(socketIOClient("localhost:4000"));
+    setSocket(socketIOClient(`${process.env.NEXT_PUBLIC_API_URL}`));
   }
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard

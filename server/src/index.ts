@@ -40,6 +40,7 @@ const main = async () => {
     process.env.REDIS_URL,
     process.env.DATABASE_URL
   );
+
   // await conn.runMigrations();
 
   const app = express();
@@ -64,8 +65,8 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
-        sameSite: "lax",
-        secure: false,
+        sameSite:"none",
+        secure: __prod__,
         domain: __prod__ ? "" : undefined,
       },
       saveUninitialized: false,
@@ -93,7 +94,7 @@ const main = async () => {
 
   apolloServer.applyMiddleware({
     app,
-    cors: false,
+    cors: false    
   });
   const httpServer = createServer(app);
 
@@ -101,7 +102,7 @@ const main = async () => {
     cors: {
       origin: process.env.CORS_ORIGIN!,
       methods: ["GET", "POST"],
-      allowedHeaders: ["balda-socket-header"],
+      allowedHeaders: ["my-custom-header"],
       credentials: true,
     },
   };
