@@ -65,9 +65,10 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
-        sameSite:"none",
-        secure: __prod__,
-        domain: __prod__ ? "" : undefined,
+        sameSite: "lax",
+        secure: true,
+        path: "/",
+        domain: __prod__ ? "api2.balda.tk" : undefined,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET!,
@@ -94,7 +95,7 @@ const main = async () => {
 
   apolloServer.applyMiddleware({
     app,
-    cors: false    
+    cors: false,
   });
   const httpServer = createServer(app);
 
@@ -102,7 +103,7 @@ const main = async () => {
     cors: {
       origin: process.env.CORS_ORIGIN!,
       methods: ["GET", "POST"],
-      allowedHeaders: ["my-custom-header"],
+      allowedHeaders: ["api2-balda"],
       credentials: true,
     },
   };

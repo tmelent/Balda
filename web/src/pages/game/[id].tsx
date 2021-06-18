@@ -51,7 +51,7 @@ const Game = ({}) => {
   const [tokenUrl, updateUrl] = useState("");
   const [makeConfirmedTurn] = useMakeConfirmedTurnMutation();
   if (!socket) {
-    setSocket(socketIOClient(`https://balda-api.herokuapp.com/`));
+    setSocket(socketIOClient(`https://api2.balda.tk/`));
   }
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
@@ -184,7 +184,7 @@ const Game = ({}) => {
       },
     }).then((res) =>
       updateUrl(
-        `https://balda.vercel.app/game/join-game/${res.data?.createInvitation as string}`
+        `https://game.balda.tk/game/join-game/${res.data?.createInvitation as string}`
       )
     );
   }
