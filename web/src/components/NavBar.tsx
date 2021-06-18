@@ -14,7 +14,7 @@ export const NavBar: React.FC = () => {
   const [logout, {loading: logoutFetching }] = useLogoutMutation();
   const { data, loading } = useMeQuery({ skip: isServer() });
   const router = useRouter();
-  let body = null;
+  let body: any;
   if (isServer() || loading) {
   } else if (!data?.me) {
     body = (

@@ -12,7 +12,7 @@ export const GameField: React.FC<GameFieldProps> = ({
   letters,
   handleField,  
 }) => {
-  var rows = [];
+  var rows:[Letter[]] = [[]];
   for (var i = 0; i < letters.length; i += 5) {
     rows.push(letters.slice(i, 5 + i));
   }

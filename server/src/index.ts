@@ -65,7 +65,7 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
         sameSite: "lax",
-        secure: __prod__,
+        secure: false,
         domain: __prod__ ? "" : undefined,
       },
       saveUninitialized: false,
@@ -81,6 +81,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: gqlSchema,
+    introspection: true,
     context: ({ req, res }): MyContext => ({
       req,
       res,

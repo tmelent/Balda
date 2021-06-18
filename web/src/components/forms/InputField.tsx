@@ -19,10 +19,8 @@ export const InputField: React.FC<InputFieldProps> = ({
   ...props
 }) => {
   const [field, { error }] = useField(props);
-  return (<div className={styles.formWrap}>  
-    
-    <FormControl isInvalid={!!error} className={`formRow ${styles.formControl}`}>
-      
+  return (<div className={styles.formWrap}>      
+    <FormControl isInvalid={!!error} className={`formRow ${styles.formControl}`}>      
       {textarea ? (
         <textarea
           {...field}

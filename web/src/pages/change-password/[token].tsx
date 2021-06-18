@@ -11,7 +11,7 @@ import { InputField } from "../../components/forms/InputField";
 import { NavBar } from "../../components/NavBar";
 import { useChangePasswordMutation } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
-import styles from "../components/styles/login.module.scss";
+import styles from "../../components/styles/login.module.scss";
 
 // Change password form. Can be accessed only with correct token
 const ChangePassword: NextPage = () => {

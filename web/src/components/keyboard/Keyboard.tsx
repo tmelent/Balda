@@ -58,7 +58,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
     handleFunction(key);
   };
 
-  var rows = [];
+  var rows:[string[]] = [[]];
   rows.push(keys.slice(0, 12));
   rows.push(keys.slice(12, 23));
   rows.push(keys.slice(23));
