@@ -1,0 +1,18 @@
+---
+application:
+  name: "balda"
+  project: "balda-api"
+  organization: "QoveryCommunity"
+databases:
+- type: "REDIS"
+  name: "balda-redis"
+  version: "6"
+- type: "POSTGRESQL"
+  name: "balda-psql"
+  version: "12"
+routers:
+- name: "main-balda"
+  routes:
+  - application_name: "balda"
+    paths:
+    - "/*"
