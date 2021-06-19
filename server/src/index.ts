@@ -30,7 +30,7 @@ const main = async () => {
       rejectUnauthorized: false,
     },
     logging: true,
-    // synchronize: true,
+    synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, GameField, Game, Letter],
   });
@@ -62,14 +62,16 @@ const main = async () => {
         client: redis,
         disableTouch: true,
       }),
-      cookie: {
+      cookie: {        
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
         sameSite: "lax",
         secure: true,
         path: "/",
-        domain: __prod__ ? "api2.balda.tk" : undefined,
+        domain: __prod__ ? process.env.COOKIE_DOMAIN : undefined,
+        
       },
+      
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET!,
       resave: false,
@@ -103,7 +105,7 @@ const main = async () => {
     cors: {
       origin: process.env.CORS_ORIGIN!,
       methods: ["GET", "POST"],
-      allowedHeaders: ["api2-balda"],
+      allowedHeaders: ["my-custom-header"],
       credentials: true,
     },
   };

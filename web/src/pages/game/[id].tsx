@@ -51,7 +51,12 @@ const Game = ({}) => {
   const [tokenUrl, updateUrl] = useState("");
   const [makeConfirmedTurn] = useMakeConfirmedTurnMutation();
   if (!socket) {
-    setSocket(socketIOClient(`https://api2.balda.tk/`));
+    setSocket(socketIOClient(process.env.NEXT_PUBLIC_API_URL as string, {
+      withCredentials: true,
+      extraHeaders: {
+        "my-custom-header":"sio"
+      }
+    }));
   }
   /**
    * "insertion" phase - can choose only one cell and enter the letter with a keyboard
