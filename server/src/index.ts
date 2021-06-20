@@ -22,8 +22,7 @@ import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
 
 const main = async () => {
-  
-  await createConnection({
+  const prodConnectionOptions: ConnectionOptions = {
     type: "postgres",
     url: process.env.DATABASE_URL,
     logging: true,
@@ -33,7 +32,19 @@ const main = async () => {
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, GameField, Game, Letter],
-  }); 
+  };
+
+  const devConnectionOptions: ConnectionOptions = {
+    type: "postgres",
+    url: process.env.DATABASE_URL,
+    logging: true,
+    synchronize: true,
+    migrations: [path.join(__dirname, "./migrations/*")],
+    entities: [User, GameField, Game, Letter],
+  };
+  await createConnection(
+    __prod__ ? prodConnectionOptions : devConnectionOptions
+  );
 
   // await conn.runMigrations();
 
@@ -118,9 +129,9 @@ const main = async () => {
     socket.on("turnConfirmed", async (data) => {
       socket.to(`${data.gameId}`).emit("yourWordConfirmed", data);
     });
-    socket.on("turnRejected", async(gameId) => {
+    socket.on("turnRejected", async (gameId) => {
       socket.to(`${gameId}`).emit("yourWordRejected");
-    })
+    });
   });
 
   httpServer.listen(parseInt(process.env.PORT!), () => {
