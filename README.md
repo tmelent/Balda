@@ -24,6 +24,14 @@
 ##### - Jest (ts-jest)
 ##### - Faker
 
+
+## Deploy:
+##### Docker
+##### Google Cloud
+##### Vercel
+
+Hosted on here: https://game.balda.tk/
+
 ## Project idea
 
 "Balda" is a simple, but interesting game, which is played (usually) on 5x5 field. Each cell of the field can contain one character. 
