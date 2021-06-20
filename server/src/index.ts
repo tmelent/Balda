@@ -1,7 +1,7 @@
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
-import "dotenv-safe/config";
 import cors from "cors";
+import "dotenv-safe/config";
 import express from "express";
 import session from "express-session";
 import { createServer } from "http";
@@ -10,7 +10,7 @@ import path from "path";
 import "reflect-metadata";
 import { Server, Socket } from "socket.io";
 import { buildSchema } from "type-graphql";
-import { createConnection } from "typeorm";
+import { ConnectionOptions, createConnection } from "typeorm";
 import { COOKIE_NAME, __prod__ } from "./connections";
 import { Game } from "./entities/Game";
 import { GameField } from "./entities/GameField";
@@ -23,17 +23,27 @@ import { MyContext } from "./types";
 
 const main = async () => {
   console.log(process.env.DATABASE_URL);
-  const conn = await createConnection({
+  const prodConnectionOptions: ConnectionOptions = {
     type: "postgres",
     url: process.env.DATABASE_URL,
-    // ssl: {
-    //   rejectUnauthorized: !__prod__,
-    // },
+    logging: true,
+    ssl:{
+      rejectUnauthorized: true
+    },
+    synchronize: true,
+    migrations: [path.join(__dirname, "./migrations/*")],
+    entities: [User, GameField, Game, Letter],
+  };
+ 
+  const devConnectionOptions: ConnectionOptions = {
+    type: "postgres",
+    url: process.env.DATABASE_URL,
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, GameField, Game, Letter],
-  });
+  };
+  await createConnection(__prod__ ? prodConnectionOptions : devConnectionOptions);
 
   console.log(
     process.env.PORT,
@@ -111,8 +121,6 @@ const main = async () => {
   const io = new Server(httpServer, options);
 
   io.on("connection", (socket: Socket) => {
-    console.log(socket.id);
-    console.log(io.sockets);
     exports.socket = socket;
     exports.io = io;
     socket.emit("connection");
@@ -124,13 +132,15 @@ const main = async () => {
       socket.to(`${room}`).emit("updateGame");
     });
     socket.on("turnConfirmed", async (data) => {
-      socket.to(`${data.gameId}`)
-      .emit("yourWordConfirmed", data);
+      socket.to(`${data.gameId}`).emit("yourWordConfirmed", data);
     });
+    socket.on("turnRejected", async(gameId) => {
+      socket.to(`${gameId}`).emit("yourWordRejected");
+    })
   });
 
   httpServer.listen(parseInt(process.env.PORT!), () => {
-    console.log(`server started on http://localhost:${process.env.PORT}`);
+    console.log(`server started on ${process.env.PORT} port`);
   });
 };
 

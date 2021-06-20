@@ -1,3 +1,6 @@
+import { NetworkStatus } from "@apollo/client";
+import _ from "lodash";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
 import { GameField } from "src/components/game/GameField";
@@ -10,6 +13,7 @@ import {
 } from "src/utils/GameFieldUtils";
 import { isServer } from "src/utils/isServer";
 import { useGetGameFromUrl } from "src/utils/useGetGameFromUrl";
+import { useIsAuth } from "src/utils/useIsAuth";
 import { withApollo } from "src/utils/withApollo";
 import { Layout } from "../../components/basic/Layout";
 import { Text } from "../../components/basic/Text";
@@ -24,10 +28,6 @@ import {
   useMeQuery,
 } from "../../generated/graphql";
 
-import _, { update } from "lodash";
-import { NetworkStatus } from "@apollo/client";
-import router, { useRouter } from "next/router";
-
 const Game = ({}) => {
   // Initial states and typings
   let lettersInitial: Letter[] = [];
@@ -41,6 +41,7 @@ const Game = ({}) => {
   // Hooks
   // Fetching the game
   const router = useRouter();
+
   const { data, loading, refetch, networkStatus } = useGetGameFromUrl();
   // Fetching user data
   const meData = useMeQuery({ skip: isServer() });
@@ -64,8 +65,9 @@ const Game = ({}) => {
   const [isWaitingForConfirmation, waitForConfirmation] = useState(false);
   // Turn phase: insertion | selection
   const [phaseState, togglePhase] = useState(phaseInitialState);
+  useIsAuth();
 
-  if (!socket) {    
+  if (!socket) {
     setSocket(
       socketIOClient(process.env.SOCKET_URL as string, {
         withCredentials: true,
@@ -80,7 +82,6 @@ const Game = ({}) => {
     if (socket) {
       // If your opponent needs your approval
       socket.on("askWordConfirmation", (data) => {
-        console.log(`asking for confirmation...`);
         const { word, gameId, stringWord } = data;
         if (
           confirm(
@@ -89,8 +90,15 @@ const Game = ({}) => {
         ) {
           socket!.emit("turnConfirmed", { word, gameId, stringWord });
         }
+        socket!.emit("turnRejected", gameId);
       });
 
+      // If your word has been rejected by your opponent
+      socket.on("yourWordRejected", () => {
+        waitForConfirmation(false);
+        updateWordState([]);
+        refetch();
+      });
       // If your opponent has approved your word
       socket.on("yourWordConfirmed", async (gameData) => {
         const { word, gameId, stringWord } = gameData;
@@ -223,7 +231,7 @@ const Game = ({}) => {
   }
   if (socket) {
     socket.on("playerJoined", (socketId) => {
-      if(data.getGame?.players?.length === 1){
+      if (data.getGame?.players?.length === 1) {
         router.reload();
       }
     });

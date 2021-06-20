@@ -6,12 +6,12 @@ import {
   useCreateGameMutation,
   useGenerateMutation,
 } from "src/generated/graphql";
+import { useIsAuth } from "src/utils/useIsAuth";
 import { withApollo } from "src/utils/withApollo";
 import styles from "../../components/styles/utility.module.scss";
 export const CreateGame: React.FC = () => {
   const [createGame] = useCreateGameMutation();
   const [generateField] = useGenerateMutation();
- 
   return (    
       <Button
         onClick={async () => {
