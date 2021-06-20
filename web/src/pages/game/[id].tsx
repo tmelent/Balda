@@ -24,8 +24,9 @@ import {
   useMeQuery,
 } from "../../generated/graphql";
 
-import _ from "lodash";
+import _, { update } from "lodash";
 import { NetworkStatus } from "@apollo/client";
+import router, { useRouter } from "next/router";
 
 const Game = ({}) => {
   // Initial states and typings
@@ -38,49 +39,60 @@ const Game = ({}) => {
   };
 
   // Hooks
-
+  // Fetching the game
+  const router = useRouter();
   const { data, loading, refetch, networkStatus } = useGetGameFromUrl();
+  // Fetching user data
   const meData = useMeQuery({ skip: isServer() });
+  // Calling make turn resolver function
   const [makeTurn] = useMakeTurnMutation();
+  // Control current game field state
   const [letters, updateLetters] = useState(lettersInitial);
+  // Current word-creating state
   const [wordState, updateWordState] = useState(wordInitialState);
+  // Connecting to socket.io room
   const [roomConnection, connectToRoom] = useState(false);
+  // Socket IO connection
   const [socket, setSocket] = useState<SocketState>(initialSocketState);
-
+  // Create invitation link
   const [createInvitation] = useCreateInvitationMutation();
+  // Token URL
   const [tokenUrl, updateUrl] = useState("");
+  // Faster making turn because of no need for check everything
   const [makeConfirmedTurn] = useMakeConfirmedTurnMutation();
-  if (!socket) {
-    setSocket(socketIOClient(process.env.NEXT_PUBLIC_API_URL as string, {
-      withCredentials: true,
-      extraHeaders: {
-        "my-custom-header":"sio"
-      }
-    }));
-  }
-  /**
-   * "insertion" phase - can choose only one cell and enter the letter with a keyboard
-   * "selection" phase - can't insert values, can only select filled cells (and new one too)
-   */
+  // Is currently waiting for confirmation?
+  const [isWaitingForConfirmation, waitForConfirmation] = useState(false);
+  // Turn phase: insertion | selection
   const [phaseState, togglePhase] = useState(phaseInitialState);
 
+  if (!socket) {    
+    setSocket(
+      socketIOClient(process.env.SOCKET_URL as string, {
+        withCredentials: true,
+        extraHeaders: {
+          "my-custom-header": "sio",
+        },
+      })
+    );
+  }
   useEffect(() => {
+    // Setting up Socket connection
     if (socket) {
-      console.log(socket!.id);
+      // If your opponent needs your approval
       socket.on("askWordConfirmation", (data) => {
+        console.log(`asking for confirmation...`);
         const { word, gameId, stringWord } = data;
         if (
           confirm(
-            `Ваш оппонент хочет использовать слово ${data.stringWord}, которого нет в словаре. Разрешить?`
+            `Ваш оппонент хочет использовать слово "${data.stringWord}", которого нет в словаре. Разрешить?`
           )
         ) {
-          socket.emit("turnConfirmed", { word, gameId, stringWord });
-        } else {
-          console.log(`not confirmed`);
+          socket!.emit("turnConfirmed", { word, gameId, stringWord });
         }
       });
+
+      // If your opponent has approved your word
       socket.on("yourWordConfirmed", async (gameData) => {
-        console.log(`yourwordconfirmed event`);
         const { word, gameId, stringWord } = gameData;
         await makeConfirmedTurn({
           variables: {
@@ -92,19 +104,21 @@ const Game = ({}) => {
         refetch();
         updateWordState([]);
         socket.emit("fieldUpdated", gameId);
+        waitForConfirmation(false);
       });
     }
   }, []);
+
+  // Extracting info from data
   let playernames: string[] = [];
   let getGame = data?.getGame;
   getGame?.players?.map((i) => playernames.push(i.username));
   const isMyTurn =
     getGame?.currentTurn ===
     getGame?.players?.findIndex((i) => i.id === meData.data!.me!.id);
-
   const turnUsername = playernames[getGame?.currentTurn!];
 
-  // Fetching
+  // When loading or refetching -- keep page filled with some content
   if (loading || !meData || !data) {
     let _letters: Letter[] = new Array(25);
     for (let i = 0; i < 25; i++) {
@@ -122,6 +136,7 @@ const Game = ({}) => {
         <Layout>
           <GameField letters={[]} handleField={() => {}} />
           <Keyboard
+            waitingState={true}
             username={"..."}
             turn={false}
             handleFunction={() => {}}
@@ -150,6 +165,7 @@ const Game = ({}) => {
       <Layout>
         <GameField letters={[]} handleField={() => {}} />
         <Keyboard
+          waitingState={true}
           username={turnUsername}
           turn={isMyTurn}
           handleFunction={() => {}}
@@ -189,7 +205,7 @@ const Game = ({}) => {
       },
     }).then((res) =>
       updateUrl(
-        `https://game.balda.tk/game/join-game/${res.data?.createInvitation as string}`
+        `${process.env.THIS_DOMAIN}/game/join-game/${res.data?.createInvitation}`
       )
     );
   }
@@ -205,27 +221,26 @@ const Game = ({}) => {
     socket.emit("connectionToRoom", data.getGame!.id);
     connectToRoom(true);
   }
-
-  // Listening to socket
-  if (socket) { 
-    // When a new player joins the game
+  if (socket) {
     socket.on("playerJoined", (socketId) => {
-      console.log(`player: socketId: ${socketId}`);
+      if(data.getGame?.players?.length === 1){
+        router.reload();
+      }
     });
+
     // When turn is made, game updates
     socket.on("updateGame", () => {
       togglePhase({
         cell: null,
         phase: "insertion",
-      });      
+      });
       refetch().then((res) => {
         updateLetters(
           _.cloneDeep(res.data.getGame?.gameField.letters) as Letter[]
-        );        
+        );
       });
     });
   }
-
   const game = data.getGame;
 
   /**
@@ -245,9 +260,12 @@ const Game = ({}) => {
         });
         refetch();
         updateWordState([]);
-        socket?.emit("fieldUpdated", data.getGame!.id);
+        socket!.emit("fieldUpdated", data.getGame!.id);
       } catch (e) {
         console.error(e.message);
+        if (e.message.includes("confirmation")) {
+          waitForConfirmation(true);
+        }
       }
       return;
     }
@@ -295,8 +313,8 @@ const Game = ({}) => {
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     chosenCell: CellInput
   ) => {
-    // Player can only do something if it's his turn.
-    if (!isMyTurn) {
+    // Player can only do something if it's his turn or he is not waiting for word confirmation.
+    if (!isMyTurn || isWaitingForConfirmation) {
       return;
     }
 
@@ -330,6 +348,7 @@ const Game = ({}) => {
         </div>
       ) : null}{" "}
       <Keyboard
+        waitingState={isWaitingForConfirmation}
         username={turnUsername}
         turn={isMyTurn}
         handleFunction={handleInsertion}

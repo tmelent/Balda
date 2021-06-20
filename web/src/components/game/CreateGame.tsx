@@ -25,7 +25,7 @@ export const CreateGame: React.FC = () => {
           router.push({
             pathname: "/game/[id]",
             query: { id },
-          });          
+          }).then(() => router.reload());          
      
         }}
         className={styles.createGameBtn}

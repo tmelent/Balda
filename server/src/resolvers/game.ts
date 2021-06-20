@@ -283,11 +283,12 @@ export class GameResolver {
 
           console.log(`clients count: ${io.engine.clientsCount}`);
 
-          const opponentSocketId = socketIds.find((i) => i !== socketId);
+          const opponentSocketId = socketIds.find((i) => i === socketId);
           console.log(opponentSocketId);
           if (opponentSocketId) {
             (serv.io as Server)
-              .to(opponentSocketId!)
+              .to(`${gameId}`)
+              .except(opponentSocketId)
               .emit("askWordConfirmation", {
                 gameId,
                 word,

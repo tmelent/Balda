@@ -392,7 +392,7 @@ export type GetGameHistoryQuery = (
     & Pick<Game, 'id' | 'initialWord' | 'status' | 'scoreP1' | 'scoreP2' | 'currentTurn'>
     & { players?: Maybe<Array<(
       { __typename?: 'User' }
-      & Pick<User, 'id'>
+      & Pick<User, 'id' | 'username'>
     )>>, gameField: (
       { __typename?: 'GameField' }
       & { letters: Array<(
@@ -913,6 +913,7 @@ export const GetGameHistoryDocument = gql`
     scoreP2
     players {
       id
+      username
     }
     currentTurn
     gameField {

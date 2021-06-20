@@ -6,6 +6,7 @@ import utilStyles from "../styles/utility.module.scss";
 interface KeyboardProps {
   username: string;
   turn: boolean;
+  waitingState: boolean;
   handleFunction: Function;
   resetFunction: Function;
   sendFunction: Function;
@@ -13,6 +14,7 @@ interface KeyboardProps {
 export const Keyboard: React.FC<KeyboardProps> = ({
   username,
   turn,
+  waitingState,
   handleFunction,
   resetFunction,
   sendFunction,
@@ -58,24 +60,34 @@ export const Keyboard: React.FC<KeyboardProps> = ({
     handleFunction(key);
   };
 
-  var rows:[string[]] = [[]];
+  var rows: [string[]] = [[]];
   rows.push(keys.slice(0, 12));
   rows.push(keys.slice(12, 23));
   rows.push(keys.slice(23));
   return (
     <div className={styles.keyboardWrap}>
       <Flex className={styles.buttonsWrap}>
-        <Text className={styles.turnText}>{turn ? `Ваш ход`:`Сейчас ходит: ${username}`}</Text>
+        <Text className={styles.turnText}>
+          {turn ? `Ваш ход` : username ? `Сейчас ходит: ${username}` : `Играть одному скучно... пригласите друга!`}
+        </Text>
         <div
           className={`${styles.submitBtn} ${utilStyles.unselectable}`}
-          onClick={async () => await sendFunction()}
+          onClick={async () => {
+            if (!waitingState) {
+              await sendFunction();
+            }
+          }}
         >
           Отправить
         </div>
 
         <div
           className={`${styles.deleteBtn} ${utilStyles.unselectable} ${utilStyles.warningBtn}`}
-          onClick={() => resetFunction()}
+          onClick={() => {
+            if (!waitingState) {
+              resetFunction();
+            }
+          }}
         >
           Очистить
         </div>

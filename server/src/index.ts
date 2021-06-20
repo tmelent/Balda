@@ -26,9 +26,9 @@ const main = async () => {
   const conn = await createConnection({
     type: "postgres",
     url: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    // ssl: {
+    //   rejectUnauthorized: !__prod__,
+    // },
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
@@ -62,16 +62,14 @@ const main = async () => {
         client: redis,
         disableTouch: true,
       }),
-      cookie: {        
+      cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 yrs
         httpOnly: true,
         sameSite: "lax",
-        secure: true,
+        secure: __prod__,
         path: "/",
         domain: __prod__ ? process.env.COOKIE_DOMAIN : undefined,
-        
       },
-      
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET!,
       resave: false,
@@ -113,27 +111,21 @@ const main = async () => {
   const io = new Server(httpServer, options);
 
   io.on("connection", (socket: Socket) => {
+    console.log(socket.id);
+    console.log(io.sockets);
     exports.socket = socket;
     exports.io = io;
     socket.emit("connection");
     socket.on("connectionToRoom", (room) => {
-      console.log(`${socket.id} connected to room ${room}`);
-      io.socketsJoin(`${room}`);
-      console.log(socket.rooms);
-      io.sockets.in(room).emit("playerJoined", socket.id);
+      socket.join(`${room}`);
+      socket.to(`${room}`).emit("playerJoined", socket.id);
     });
     socket.on("fieldUpdated", (room) => {
-      console.log(`field updated: ${room}`);
-      console.log(socket.rooms);
       socket.to(`${room}`).emit("updateGame");
     });
     socket.on("turnConfirmed", async (data) => {
-      const socketIds = (await io.in(`${data.gameId}`).fetchSockets()).map(
-        (i) => i.id
-      );
-      const opponentSocketId = socketIds.find((i) => i !== socket.id);
-
-      io.to(`${opponentSocketId}`).emit("yourWordConfirmed", data);
+      socket.to(`${data.gameId}`)
+      .emit("yourWordConfirmed", data);
     });
   });
 
