@@ -22,34 +22,18 @@ import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types";
 
 const main = async () => {
-  console.log(process.env.DATABASE_URL);
-  const prodConnectionOptions: ConnectionOptions = {
+  
+  await createConnection({
     type: "postgres",
     url: process.env.DATABASE_URL,
     logging: true,
-    ssl:{
-      rejectUnauthorized: true
+    ssl: {
+      rejectUnauthorized: false,
     },
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, GameField, Game, Letter],
-  };
- 
-  const devConnectionOptions: ConnectionOptions = {
-    type: "postgres",
-    url: process.env.DATABASE_URL,
-    logging: true,
-    synchronize: true,
-    migrations: [path.join(__dirname, "./migrations/*")],
-    entities: [User, GameField, Game, Letter],
-  };
-  await createConnection(__prod__ ? prodConnectionOptions : devConnectionOptions);
-
-  console.log(
-    process.env.PORT,
-    process.env.REDIS_URL,
-    process.env.DATABASE_URL
-  );
+  }); 
 
   // await conn.runMigrations();
 
