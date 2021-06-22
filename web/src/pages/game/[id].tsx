@@ -69,7 +69,7 @@ const Game = ({}) => {
 
   if (!socket) {
     setSocket(
-      socketIOClient(process.env.SOCKET_URL as string, {
+      socketIOClient("https://api1.balda.tk", {
         withCredentials: true,
         extraHeaders: {
           "my-custom-header": "sio",
